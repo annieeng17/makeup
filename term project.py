@@ -12,6 +12,8 @@ import os
 from video import create_capture
 from common import clock, draw_str
 
+# scaleFactor-size of face is detected in the image if present, scaling image
+# minNeighbors- number of neighbouring rectangles needed to remain detection
 
 def detect(img, cascade):
     rects = cascade.detectMultiScale(img, scaleFactor=1.3, minNeighbors=4, minSize=(30, 30),
@@ -24,6 +26,11 @@ def detect(img, cascade):
 def draw_rects(img, rects, color):
     for x1, y1, x2, y2 in rects:
         cv.rectangle(img, (x1, y1), (x2, y2), color, 2)
+
+eyes = eyeCascade.detectMultiScale(roi_gray)
+    for (ex,ey,ew,eh) in eyes:
+        cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
+        cv2.putText(frame,'Eye',(x + ex,y + ey), 1, 1, (0, 255, 0)
 
 def main():
     import sys, getopt
@@ -65,10 +72,14 @@ def main():
         draw_str(vis, (20, 20), 'time: %.1f ms' % (dt*1000))
         cv.imshow('facedetect', vis)
 
+        # press escape to close the camera
         if cv.waitKey(5) == 27:
             break
 
     print('Done')
+
+# own code
+# detecting cheek
 
 
 if __name__ == '__main__':
