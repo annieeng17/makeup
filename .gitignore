@@ -1,5 +1,5 @@
 # Files in this project
-
+.vscode/
 # Do not commit large files
 frozen_east_text_detection.tar.gz
 
