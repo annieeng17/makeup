@@ -1,4 +1,5 @@
 import cv2 as cv
+import numpy as np
 def find_cheeks (rects):
     '''
     Converts the rectangles in rects to cheek rectangles
@@ -35,11 +36,24 @@ def find_lips(rects):
     lip_ellipses = []
 
     for x1, y1, x2, y2 in rects:
-        center_x1 = int((x1 +x2)/2)
-        center_y1 = int((0.9*y2) +(0.1*y1))
-        axes_x1 = 100   
-        axes_y1 = 50
+        delta = -200
+        center_x1 = int((x1 +x2)/2) 
+        center_y1 = int((0.9*y2) +(0.1*y1)) + delta
+        axes_x1 = 25  
+        axes_y1 = 12
         lip_ellipses.append((center_x1,center_x1, axes_x1,axes_y1 ))
     return lip_ellipses
 
- 
+def find_upper_cheeks(rects):
+    upper_cheeks = []
+    for x1, y1, x2, y2 in rects:
+        
+def find_avg_color(img, x, y):
+    # turns into a numpy list, better than normal lists. can't do in python
+    delta = 3
+    upperLeft = np.array(img[y-delta,x-delta])
+    upperRight = np.array(img[y-delta,x+delta])
+    lowerLeft = np.array(img[y+delta, x-delta])
+    lowerRight = np.array(img[y+delta, x+delta])
+    average = (upperLeft + upperRight+ lowerLeft+ lowerRight)/4
+    return average
