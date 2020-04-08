@@ -3,7 +3,7 @@ import time
 
 from tkinter import *
 from PIL import Image, ImageTk
-
+from constants import *
 import cv2
 
 from opencvLib import *
@@ -85,6 +85,7 @@ def draw_triangle(img,triangle,color,thickness):
         cv2.line(img,(pt_x2, pt_y2),(pt_x3, pt_y3), color,thickness)
         cv2.line(img,(pt_x3, pt_y3),(pt_x1, pt_y1), color,thickness)
 
+
 class App:
     # Keep track of what state your program is in
     # TODO: you should use an enum for this for different states
@@ -95,9 +96,17 @@ class App:
         self.window.title(window_title)
         self.window.bind('<Escape>', lambda e: self.window.quit())
         self.video_source = video_source
-
+        self._state = STATE_MENU
         # open video source (by default this will try to open the computer webcam)
         self.vid = VideoCapture(self.video_source)
+
+        self._button_text = 'Start'
+        # create button
+        button = Button(self.window, 
+                   text=self._button_text, 
+                   fg="black",
+                   command=self.button_func)
+        button.pack(side=LEFT)
 
         # Create a canvas that can fit the above video source size
         self.canvas = Canvas(window, width = self.vid.width, height = self.vid.height)
@@ -112,6 +121,12 @@ class App:
         self.update()
 
         self.window.mainloop()
+
+    def button_func(self):
+        print("button press")
+        if self._state == STATE_MENU:
+            self._button_text = 'Next'
+            self._state = STATE_FACE
 
     def callback_mouse(self, event):
         self._state += 1
@@ -183,8 +198,10 @@ class VideoCapture:
                 draw_ellipses(vis, lip_ellipses,(255,0,255),thickness = 1)
                 upper_cheeks = find_upper_cheeks(rects)
                 draw_triangle(vis,upper_cheeks,(255,255,0),thickness = 1)
+                upper_cheeks2 = find_upper_cheeks(rects)
+                draw_triangle(vis,upper_cheeks,(255,255,0),thickness = 1)
                 cheek_bones = find_cheek_bones(rects)
-                draw_triangle(vis,cheek_bones,(0,0,0),thickness = 1)
+                draw_triangle(vis,cheek_bones,(0,255,255),thickness = 1)
 
                 # Eye detection
                 if not self.nested.empty():
