@@ -16,6 +16,15 @@ face and generates/recommends a color
 
 - find average color within the center (4 points) of the rectangle and ellipse
 
+## Finite State Machine
+
+- First part where theres no open cv and then just your face
+
+- Then each time using the geometry to detect the part of your face as 1 step 
+each and then detecting the color/outputting the result as the step after each 
+one
+
+
 ## Color Palette
 
 -extract average skin tone color within a shape and generate what color suits 
