@@ -27,9 +27,9 @@ def draw(canvas,width,height):
     canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill= 'pink')
 
 
-
+# CITATION: I got it the code off of this website for guidiance
 # based off of https://www.tutorialsteacher.com/python/create-ui-using-tkinter-in-python
-# and altered
+# and slightly altered
 
 def detect(img, cascade):
     rects = cascade.detectMultiScale(
@@ -69,7 +69,7 @@ def draw_ellipses(img, ellipses, color,thickness):
         # Drawing your face
         cv.ellipse(img,(center_x1,center_y1),(axes_x1,axes_y1), \
         0,0,360,color,thickness)
-
+# CITATION: used for drawing rects, ellipses and making lines
 # used and altered from https://docs.opencv.org/3.4/dc/da5/tutorial_py_drawing_functions.html
 # cv2.line(img, p1, p2, (255, 0, 0), 3)
 def draw_triangle(img,triangle,color,thickness):
@@ -121,13 +121,46 @@ class App:
         self.update()
 
         self.window.mainloop()
-
+    
     def button_func(self):
         print("button press")
         if self._state == STATE_MENU:
             self._button_text = 'Next'
             self._state = STATE_FACE
+        
+        elif self._state == STATE_FACE:
+            self._button_text = 'Next'
+            self._state = STATE_FACE_BOX
 
+        elif self._state == STATE_FACE_BOX:
+            self._button_text = 'Next'
+            self._state = STATE_FACE_BOX_RESULTS
+
+        elif self._state == STATE_FACE_BOX_RESULTS:  
+            self._button_text = 'Next'
+            self._state = STATE_EYES
+
+        elif self._state == STATE_EYES:
+            self._button_text = 'Next'
+            self._state = STATE_EYES_RESULTS
+
+        elif self._state == STATE_EYES_RESULTS:     
+            self._button_text = 'Next'
+            self._state = STATE_BLUSH
+
+        elif self._state == STATE_BLUSH:    
+            self._button_text = 'Next'
+            self._state = STATE_BLUSH_RESULTS
+
+        elif self._state == STATE_BLUSH_RESULTS:
+            self._button_text = 'Next'
+            self._state = STATE_HIGHLIGHTER
+
+        elif self._state == STATE_HIGHLIGHTER:
+            self._button_text = 'Next'
+            self._state = STATE_HIGHLIGHTER_RESULTS
+            
+        
     def callback_mouse(self, event):
         self._state += 1
         print("clicked at", event.x, event.y)
