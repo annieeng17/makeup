@@ -8,6 +8,7 @@ import cv2
 
 from opencvLib import *
 # creating the stuff to put into tkinter
+'''
 Window = Tk()
 Window.geometry("500x500")
 Window.title('Introduction~')
@@ -25,7 +26,7 @@ Window.mainloop() #used to run the application
 def draw(canvas,width,height):
     (cx, cy, r) = (width/2, height/2, min(width, height)/3)
     canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill= 'pink')
-
+'''
 
 # CITATION: I got it the code off of this website for guidiance
 # based off of https://www.tutorialsteacher.com/python/create-ui-using-tkinter-in-python
@@ -100,13 +101,12 @@ class App:
         # open video source (by default this will try to open the computer webcam)
         self.vid = VideoCapture(self.video_source)
 
-        self._button_text = 'Start'
         # create button
-        button = Button(self.window, 
-                   text=self._button_text, 
+        self._button = Button(self.window, 
+                   text='Start', 
                    fg="black",
                    command=self.button_func)
-        button.pack(side=LEFT)
+        self._button.pack(side=LEFT)
 
         # Create a canvas that can fit the above video source size
         self.canvas = Canvas(window, width = self.vid.width, height = self.vid.height)
@@ -118,14 +118,14 @@ class App:
 
         # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
-        self.update()
+        # self.update()
 
         self.window.mainloop()
     
     def button_func(self):
-        print("button press")
+        
         if self._state == STATE_MENU:
-            self._button_text = 'Next'
+            self._button['text'] = 'Next'
             self._state = STATE_FACE
         
         elif self._state == STATE_FACE:
@@ -159,7 +159,7 @@ class App:
         elif self._state == STATE_HIGHLIGHTER:
             self._button_text = 'Next'
             self._state = STATE_HIGHLIGHTER_RESULTS
-            
+        print("button press",self._state)    
         
     def callback_mouse(self, event):
         self._state += 1
@@ -176,12 +176,23 @@ class App:
         '''
         Called every self.delay milliseconds
         '''
-        # Get a frame from the video source
-        ret, frame = self.vid.get_frame()
+        if self._state == STATE_MENU:
+            Label1 = Label(window, text = "Welcome to Annie's Makeup Project!",\
+            width = 20, font=("Helvetica", 16))
 
-        if ret:
-            self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
-            self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
+            Label1.place(x = 90, y =  50)
+
+            Label2 = Label(window, text = "Press Start", width = 20, font=("Helvetica", 12))
+
+            Label2.place(x = 150, y = 75)
+        else:
+            # Get a frame from the video source
+            ret, frame = self.vid.get_frame()
+
+
+            if ret:
+                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
+                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
 
         self.window.after(self.delay, self.update)
 
