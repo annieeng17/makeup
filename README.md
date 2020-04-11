@@ -24,6 +24,8 @@ face and generates/recommends a color
 each and then detecting the color/outputting the result as the step after each 
 one
 
+-Specifically STATE_SKIN_TONE doesn't use the webcam but it asks the user 
+whether they're cool, warm or neutral tones based on a series of questions
 
 ## Color Palette
 
