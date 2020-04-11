@@ -8,26 +8,6 @@ import cv2
 
 from opencvLib import *
 # creating the stuff to put into tkinter
-'''
-Window = Tk()
-Window.geometry("500x500")
-Window.title('Introduction~')
-Label1 = Label(Window, text = "Welcome to Annie's Makeup Project!",\
-    width = 20, font=("Helvetica", 16))
-
-Label1.place(x = 90, y =  50)
-
-Label2 = Label(Window, text = "Press Start", width = 20, font=("Helvetica", 12))
-
-Label2.place(x = 150, y = 75)
-
-Window.mainloop() #used to run the application
-
-def draw(canvas,width,height):
-    (cx, cy, r) = (width/2, height/2, min(width, height)/3)
-    canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill= 'pink')
-'''
-
 # CITATION: I got it the code off of this website for guidiance
 # based off of https://www.tutorialsteacher.com/python/create-ui-using-tkinter-in-python
 # and slightly altered
@@ -106,6 +86,12 @@ class App:
                    text='Start', 
                    fg="black",
                    command=self.button_func)
+        self._button.pack(side=RIGHT)
+
+        self._button1 = Button(self.window, 
+                   text='Back', 
+                   fg="black",
+                   command=self.button_func)
         self._button.pack(side=LEFT)
 
         # Create a canvas that can fit the above video source size
@@ -118,49 +104,126 @@ class App:
 
         # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
-        # self.update()
+        self.update()
 
         self.window.mainloop()
     
-    def button_func(self):
-        
+    def button_func(self): 
         if self._state == STATE_MENU:
             self._button['text'] = 'Next'
             self._state = STATE_FACE
         
         elif self._state == STATE_FACE:
-            self._button_text = 'Next'
+            self._button['text'] = 'Next'
             self._state = STATE_FACE_BOX
 
         elif self._state == STATE_FACE_BOX:
-            self._button_text = 'Next'
+            self._button['text'] = 'Next'
             self._state = STATE_FACE_BOX_RESULTS
 
         elif self._state == STATE_FACE_BOX_RESULTS:  
-            self._button_text = 'Next'
+            self._button['text'] = 'Next'
             self._state = STATE_EYES
 
         elif self._state == STATE_EYES:
-            self._button_text = 'Next'
+            self._button['text'] = 'Next'
             self._state = STATE_EYES_RESULTS
 
         elif self._state == STATE_EYES_RESULTS:     
-            self._button_text = 'Next'
+            self._button['text'] = 'Next'
             self._state = STATE_BLUSH
 
         elif self._state == STATE_BLUSH:    
-            self._button_text = 'Next'
+            self._button['text'] = 'Next'
             self._state = STATE_BLUSH_RESULTS
 
         elif self._state == STATE_BLUSH_RESULTS:
-            self._button_text = 'Next'
+            self._button['text'] = 'Next'
             self._state = STATE_HIGHLIGHTER
 
         elif self._state == STATE_HIGHLIGHTER:
-            self._button_text = 'Next'
+            self._button['text'] = 'Next'
             self._state = STATE_HIGHLIGHTER_RESULTS
+        
+        elif self._state == STATE_HIGHLIGHTER_RESULTS:
+            self._button['text'] = 'Next'
+            self._state = STATE_CONTOUR
+
+        elif self._state == STATE_CONTOUR:
+            self._button['text'] = 'Next'
+            self._state = STATE_CONTOUR_RESULTS
+        
+        elif self._state == STATE_CONTOUR_RESULTS:
+            self._button['text'] = 'Next'
+            self._state = STATE_LIP
+
+        elif self._state == STATE_LIP:
+            self._button['text'] = 'Next'
+            self._state = STATE_LIP_RESULTS 
+        
+        else:
+            self._state = self.vid.get_frame(self._state)
         print("button press",self._state)    
         
+    def button_func_back(self):
+        if self._state == STATE_MENU:
+            self._button1['text'] = 'Back'
+            self._state = STATE_MENU
+        
+        elif self._state == STATE_FACE:
+            self._button1['text'] = 'Back'
+            self._state = STATE_MENU
+
+        elif self._state == STATE_FACE_BOX:
+            self._button1['text'] = 'Back'
+            self._state = STATE_FACE
+
+        elif self._state == STATE_FACE_BOX_RESULTS:  
+            self._button1['text'] = 'Back'
+            self._state = STATE_FACE_BOX
+
+        elif self._state == STATE_EYES:
+            self._button1['text'] = 'Back'
+            self._state = STATE_FACE_BOX_RESULTS
+
+        elif self._state == STATE_EYES_RESULTS:     
+            self._button1['text'] = 'Back'
+            self._state = STATE_EYES
+
+        elif self._state == STATE_BLUSH:    
+            self._button1['text'] = 'Back'
+            self._state = STATE_EYES_RESULTS
+
+        elif self._state == STATE_BLUSH_RESULTS:
+            self._button1['text'] = 'Back'
+            self._state = STATE_BLUSH
+
+        elif self._state == STATE_HIGHLIGHTER:
+            self._button1['text'] = 'Back'
+            self._state = STATE_BLUSH_RESULTS
+
+        elif self._state == STATE_HIGHLIGHTER_RESULTS:
+            self._button1['text'] = 'Back'
+            self._state = STATE_HIGHLIGHTER
+
+        elif self._state == STATE_CONTOUR:
+            self._button1['text'] = 'Back'
+            self._state = STATE_HIGHLIGHTER_RESULTS
+
+        elif self._state == STATE_CONTOUR_RESULTS:
+            self._button1['text'] = 'Back'
+            self._state = STATE_CONTOUR
+
+        elif self._state == STATE_LIP:
+            self._button1['text'] = 'Back'
+            self._state = STATE_CONTOUR_RESULTS
+        
+        elif self._state == STATE_LIP_RESULTS:
+            self._button1['text'] = 'Back'
+            self._state == STATE_LIP
+
+        print("button press",self._state)    
+
     def callback_mouse(self, event):
         self._state += 1
         print("clicked at", event.x, event.y)
@@ -177,17 +240,20 @@ class App:
         Called every self.delay milliseconds
         '''
         if self._state == STATE_MENU:
-            Label1 = Label(window, text = "Welcome to Annie's Makeup Project!",\
+            Label1 = Label(self.window, text = "Welcome to Annie's Makeup Project!",\
             width = 20, font=("Helvetica", 16))
 
             Label1.place(x = 90, y =  50)
 
-            Label2 = Label(window, text = "Press Start", width = 20, font=("Helvetica", 12))
+            Label2 = Label(self.window, text = "Press Start", width = 20, font=("Helvetica", 12))
 
             Label2.place(x = 150, y = 75)
-        else:
+        else: # remove label later ok
+            Label1 = Label(self.window, text = f'{}')
             # Get a frame from the video source
-            ret, frame = self.vid.get_frame()
+            # Pass our current state to know which box to draw
+            ret, frame = self.vid.get_frame(self._state)
+
 
 
             if ret:
@@ -216,7 +282,7 @@ class VideoCapture:
         self.cascade = cv.CascadeClassifier(cv.samples.findFile(cascade_fn))
         self.nested = cv.CascadeClassifier(cv.samples.findFile(nested_fn))
 
-    def get_frame(self):
+    def get_frame(self,state):
         if self.vid.isOpened():
             ret, img = self.vid.read()
 
@@ -235,17 +301,21 @@ class VideoCapture:
 
                 # Facial Feature detection
                 # color formatting is (blue ,green, red)
-                draw_rects(vis, rects, (0, 255, 0))
-                cheek_rects = find_cheeks(rects)
-                draw_rects(vis,cheek_rects,(0, 0, 255))
-                lip_ellipses = find_lips(rects)
-                draw_ellipses(vis, lip_ellipses,(255,0,255),thickness = 1)
-                upper_cheeks = find_upper_cheeks(rects)
-                draw_triangle(vis,upper_cheeks,(255,255,0),thickness = 1)
-                upper_cheeks2 = find_upper_cheeks(rects)
-                draw_triangle(vis,upper_cheeks,(255,255,0),thickness = 1)
-                cheek_bones = find_cheek_bones(rects)
-                draw_triangle(vis,cheek_bones,(0,255,255),thickness = 1)
+                    
+                if state == STATE_FACE_BOX:
+                    draw_rects(vis, rects, (0, 255, 0))
+                elif state == STATE_BLUSH:  
+                    cheek_rects = find_cheeks(rects)   
+                    draw_rects(vis,cheek_rects,(0, 0, 255))
+                elif state == STATE_HIGHLIGHTER:
+                    upper_cheeks = find_upper_cheeks(rects)
+                    draw_triangle(vis,upper_cheeks,(255,255,0),thickness = 1)
+                elif state == STATE_CONTOUR:
+                    cheek_bones = find_cheek_bones(rects)
+                    draw_triangle(vis,cheek_bones,(0,255,255),thickness = 1)
+                elif state == STATE_LIP:
+                    lip_ellipses = find_lips(rects)
+                    draw_ellipses(vis, lip_ellipses,(255,0,255),thickness = 1)
 
                 # Eye detection
                 if not self.nested.empty():
