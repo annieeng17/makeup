@@ -2,7 +2,7 @@ import sys, getopt
 import time
 
 from tkinter import *
-import tkinter.font as font
+from tkinter.font import Font
 from PIL import Image, ImageTk
 from constants import *
 import cv2
@@ -35,7 +35,7 @@ def draw_rects(img, rects, color):
     param img: image to draw rectangles on
     param rects: list of rectangles to draw, format [(x1, y1, x2, y2), ...]
     param color: color to draw the rectangles, (R, G, B) coordinate.
-    '''tc
+    '''
     for x1, y1, x2, y2 in rects:
         # Drawing your face
         cv.rectangle(img, (x1, y1), (x2, y2), color, 2)
@@ -87,19 +87,21 @@ class App:
         # CITATION: https://www.python-course.eu/tkinter_buttons.php
 
         # define font
-        # font = self._button.Font(family='Helvetica')
+        self.text = Text(self.window)
+        self.myFont = Font(family = 'Times New Roman')
+        self.text.configure(font = myFont)
         self._button = Button(self.window, 
                    text='Start', 
                    fg="black",
                    command=self.button_func)
         self._button.pack(side=RIGHT)
-        # self._button['font'] = font
+        self._button['font'] = self.myFont
         self._button1 = Button(self.window, 
                    text='Back', 
                    fg="black",
                    command=self.button_func)
         self._button1.pack(side=LEFT)
-
+        self._button1['font'] = self.myFont
         # Create a canvas that can fit the above video source size
         self.canvas = Canvas(window, width = self.vid.width, height = self.vid.height)
 
@@ -314,6 +316,8 @@ class VideoCapture:
                     
                 if state == STATE_FACE_BOX:
                     draw_rects(vis, rects, (0, 255, 0))
+                # elif state == STATE_SKIN_TONE:
+
                 elif state == STATE_BLUSH:  
                     cheek_rects = find_cheeks(rects)   
                     draw_rects(vis,cheek_rects,(0, 0, 255))
@@ -326,14 +330,14 @@ class VideoCapture:
                 elif state == STATE_LIP:
                     lip_ellipses = find_lips(rects)
                     draw_ellipses(vis, lip_ellipses,(255,0,255),thickness = 1)
-
-                # Eye detection
-                if not self.nested.empty():
-                    for x1, y1, x2, y2 in rects:
-                        roi = gray[y1:y2, x1:x2]
-                        vis_roi = vis[y1:y2, x1:x2]
-                        subrects = detect(roi.copy(), self.nested)
-                        draw_rects(vis_roi, subrects, (255, 0, 0))
+                elif state == STATE_EYES:
+                    # Eye detection
+                    if not self.nested.empty():
+                        for x1, y1, x2, y2 in rects:
+                            roi = gray[y1:y2, x1:x2]
+                            vis_roi = vis[y1:y2, x1:x2]
+                            subrects = detect(roi.copy(), self.nested)
+                            draw_rects(vis_roi, subrects, (255, 0, 0))
 
                 # Flip image so that the feed is mirrored to the user
                 vis = cv2.flip(vis, 1)
