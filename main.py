@@ -89,7 +89,7 @@ class App:
         # define font
         self.text = Text(self.window)
         self.myFont = Font(family = 'Times New Roman')
-        self.text.configure(font = myFont)
+        self.text.configure(font = self.myFont)
         self._button = Button(self.window, 
                    text='Start', 
                    fg="black",
@@ -99,7 +99,7 @@ class App:
         self._button1 = Button(self.window, 
                    text='Back', 
                    fg="black",
-                   command=self.button_func)
+                   command=self.button_func_back)
         self._button1.pack(side=LEFT)
         self._button1['font'] = self.myFont
         # Create a canvas that can fit the above video source size
@@ -116,125 +116,139 @@ class App:
 
         self.window.mainloop()
     
-    def button_func(self): 
+    def update_fsm(self, action):
+        '''
+        State machine to decide the action of the program.
+
+        Takes in an action and looks at the current state to determine
+        what next state to go to and what actions to take
+
+        :param action: The action that occurred
+        '''
+
         if self._state == STATE_MENU:
-            self._button['text'] = 'Next'
-            self._state = STATE_FACE
-        
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_FACE
+                self._button['text'] = 'Next'
+
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_MENU
+            
         elif self._state == STATE_FACE:
-            self._button['text'] = 'Next'
-            self._state = STATE_FACE_BOX
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_FACE_BOX
 
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_MENU            
+                self._button['text'] = 'Start'
+               
         elif self._state == STATE_FACE_BOX:
-            self._button['text'] = 'Next'
-            self._state = STATE_FACE_BOX_RESULTS
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_FACE_BOX_RESULTS
 
-        elif self._state == STATE_FACE_BOX_RESULTS:  
-            self._button['text'] = 'Next'
-            self._state = STATE_SKIN_TONE
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_FACE
 
-        elif self._state == STATE_SKIN_TONE:  
-            self._button['text'] = 'Next'
-            self._state = STATE_EYES
+        elif self._state == STATE_FACE_BOX_RESULTS:
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_SKIN_TONE
+
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_FACE_BOX
+
+        elif self._state == STATE_SKIN_TONE:
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_EYES
+
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_FACE_BOX_RESULTS
 
         elif self._state == STATE_EYES:
-            self._button['text'] = 'Next'
-            self._state = STATE_EYES_RESULTS
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_EYES_RESULTS
 
-        elif self._state == STATE_EYES_RESULTS:     
-            self._button['text'] = 'Next'
-            self._state = STATE_BLUSH
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_SKIN_TONE
 
-        elif self._state == STATE_BLUSH:    
-            self._button['text'] = 'Next'
-            self._state = STATE_BLUSH_RESULTS
+        elif self._state == STATE_EYES_RESULTS:  
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_BLUSH
+
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_EYES
+
+        elif self._state == STATE_BLUSH:
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_BLUSH_RESULTS
+
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_EYES_RESULTS
 
         elif self._state == STATE_BLUSH_RESULTS:
-            self._button['text'] = 'Next'
-            self._state = STATE_HIGHLIGHTER
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_HIGHLIGHTER
+
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_BLUSH
 
         elif self._state == STATE_HIGHLIGHTER:
-            self._button['text'] = 'Next'
-            self._state = STATE_HIGHLIGHTER_RESULTS
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_HIGHLIGHTER_RESULTS
+
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_BLUSH_RESULTS
         
         elif self._state == STATE_HIGHLIGHTER_RESULTS:
-            self._button['text'] = 'Next'
-            self._state = STATE_CONTOUR
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_CONTOUR
+
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_HIGHLIGHTER
 
         elif self._state == STATE_CONTOUR:
-            self._button['text'] = 'Next'
-            self._state = STATE_CONTOUR_RESULTS
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_CONTOUR_RESULTS
+
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_HIGHLIGHTER_RESULTS
         
         elif self._state == STATE_CONTOUR_RESULTS:
-            self._button['text'] = 'Next'
-            self._state = STATE_LIP
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_LIP
+
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_CONTOUR
 
         elif self._state == STATE_LIP:
-            self._button['text'] = 'Next'
-            self._state = STATE_LIP_RESULTS 
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_LIP_RESULTS 
+
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_CONTOUR_RESULTS
+
+        elif self._state == STATE_LIP_RESULTS:
+            if action == ACTION_BUTTON_BACK:
+                self._state = STATE_LIP
         
+        # Default case 
+        # Likely something that's wrong
         else:
             self._state = self.vid.get_frame(self._state)
-        print("button press",self._state)    
+
+        print('Action: {} New State:{}'.format(action, self._state))
+
+
+    def button_func(self): 
+        '''
+        Invoked when the start/next button is clicked
+        '''
+        self.update_fsm(ACTION_BUTTON_NEXT)
         
     def button_func_back(self):
-        if self._state == STATE_MENU:
-            self._button1['text'] = 'Back'
-            self._state = STATE_MENU
-        
-        elif self._state == STATE_FACE:
-            self._button1['text'] = 'Back'
-            self._state = STATE_MENU
-
-        elif self._state == STATE_FACE_BOX:
-            self._button1['text'] = 'Back'
-            self._state = STATE_FACE
-
-        elif self._state == STATE_FACE_BOX_RESULTS:  
-            self._button1['text'] = 'Back'
-            self._state = STATE_FACE_BOX
-
-        elif self._state == STATE_EYES:
-            self._button1['text'] = 'Back'
-            self._state = STATE_FACE_BOX_RESULTS
-
-        elif self._state == STATE_EYES_RESULTS:     
-            self._button1['text'] = 'Back'
-            self._state = STATE_EYES
-
-        elif self._state == STATE_BLUSH:    
-            self._button1['text'] = 'Back'
-            self._state = STATE_EYES_RESULTS
-
-        elif self._state == STATE_BLUSH_RESULTS:
-            self._button1['text'] = 'Back'
-            self._state = STATE_BLUSH
-
-        elif self._state == STATE_HIGHLIGHTER:
-            self._button1['text'] = 'Back'
-            self._state = STATE_BLUSH_RESULTS
-
-        elif self._state == STATE_HIGHLIGHTER_RESULTS:
-            self._button1['text'] = 'Back'
-            self._state = STATE_HIGHLIGHTER
-
-        elif self._state == STATE_CONTOUR:
-            self._button1['text'] = 'Back'
-            self._state = STATE_HIGHLIGHTER_RESULTS
-
-        elif self._state == STATE_CONTOUR_RESULTS:
-            self._button1['text'] = 'Back'
-            self._state = STATE_CONTOUR
-
-        elif self._state == STATE_LIP:
-            self._button1['text'] = 'Back'
-            self._state = STATE_CONTOUR_RESULTS
-        
-        elif self._state == STATE_LIP_RESULTS:
-            self._button1['text'] = 'Back'
-            self._state == STATE_LIP
-
-        print("button press",self._state)    
+        '''
+        Invoked when the start/next button is clicked
+        '''  
+        self.update_fsm(ACTION_BUTTON_BACK)
 
     def callback_mouse(self, event):
         self._state += 1
@@ -252,16 +266,17 @@ class App:
         Called every self.delay milliseconds
         '''
         if self._state == STATE_MENU:
-            Label1 = Label(self.window, text = "Welcome to Annie's Makeup Project!",\
+            Label1 = Label(self.window,text = "Welcome to Annie's Makeup Project!", \
             width = 20, font=("Helvetica", 16))
 
             Label1.place(x = 90, y =  50)
 
-            Label2 = Label(self.window, text = "Press Start", width = 20, font=("Helvetica", 12))
+            Label2 = Label(self.window, text = "Press Start", width = 20, \
+                     font=("Times New Roman", 12))
 
             Label2.place(x = 150, y = 75)
         else: # remove label later ok
-            # Label1 = Label(self.window, text = f'{}')
+            Label1 = Label(self.window, text = f'{}')
             # Get a frame from the video source
             # Pass our current state to know which box to draw
             ret, frame = self.vid.get_frame(self._state)
