@@ -2,11 +2,13 @@ import sys, getopt
 import time
 
 from tkinter import *
+import tkinter.font as font
 from PIL import Image, ImageTk
 from constants import *
 import cv2
 
 from opencvLib import *
+from makeupLib import *
 # creating the stuff to put into tkinter
 # CITATION: I got it the code off of this website for guidiance
 # based off of https://www.tutorialsteacher.com/python/create-ui-using-tkinter-in-python
@@ -33,7 +35,7 @@ def draw_rects(img, rects, color):
     param img: image to draw rectangles on
     param rects: list of rectangles to draw, format [(x1, y1, x2, y2), ...]
     param color: color to draw the rectangles, (R, G, B) coordinate.
-    '''
+    '''tc
     for x1, y1, x2, y2 in rects:
         # Drawing your face
         cv.rectangle(img, (x1, y1), (x2, y2), color, 2)
@@ -82,17 +84,21 @@ class App:
         self.vid = VideoCapture(self.video_source)
 
         # create button
+        # CITATION: https://www.python-course.eu/tkinter_buttons.php
+
+        # define font
+        # font = self._button.Font(family='Helvetica')
         self._button = Button(self.window, 
                    text='Start', 
                    fg="black",
                    command=self.button_func)
         self._button.pack(side=RIGHT)
-
+        # self._button['font'] = font
         self._button1 = Button(self.window, 
                    text='Back', 
                    fg="black",
                    command=self.button_func)
-        self._button.pack(side=LEFT)
+        self._button1.pack(side=LEFT)
 
         # Create a canvas that can fit the above video source size
         self.canvas = Canvas(window, width = self.vid.width, height = self.vid.height)
@@ -122,6 +128,10 @@ class App:
             self._state = STATE_FACE_BOX_RESULTS
 
         elif self._state == STATE_FACE_BOX_RESULTS:  
+            self._button['text'] = 'Next'
+            self._state = STATE_SKIN_TONE
+
+        elif self._state == STATE_SKIN_TONE:  
             self._button['text'] = 'Next'
             self._state = STATE_EYES
 
@@ -249,7 +259,7 @@ class App:
 
             Label2.place(x = 150, y = 75)
         else: # remove label later ok
-            Label1 = Label(self.window, text = f'{}')
+            # Label1 = Label(self.window, text = f'{}')
             # Get a frame from the video source
             # Pass our current state to know which box to draw
             ret, frame = self.vid.get_frame(self._state)
