@@ -26,3 +26,17 @@ neutral toned
 # if deep skin
 # cheeks:
 # cool: raisin, warm: bright tangerine, neutral: rich cinnamon
+
+# Label1 = (window, )
+
+# def STATE_SKINTONE:
+# fair skin(literally white and light)ranging from 
+# (226,245,253) 
+# (203,241,253)
+# (186,229,251)
+# (180,220,253)
+# (255,214,164)
+# light skin(similar to pale skin but with undertones of yellow and beige)
+# still trying to decide
+# (172,219,255)
+# medium skin()
