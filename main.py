@@ -1,6 +1,6 @@
 import sys, getopt
 import time
-
+import basic_graphics
 from tkinter import *
 from tkinter.font import Font
 from PIL import Image, ImageTk
@@ -97,11 +97,12 @@ class App:
         self._button.pack(side=RIGHT)
         self._button['font'] = self.myFont
         self._button1 = Button(self.window, 
-                   text='Back', 
-                   fg="black",
-                   command=self.button_func_back)
-        self._button1.pack(side=LEFT)
+                text='Back', 
+                fg="black",
+                command=self.button_func_back)
+        # self._button1.pack(side=LEFT)
         self._button1['font'] = self.myFont
+        
         # Create a canvas that can fit the above video source size
         self.canvas = Canvas(window, width = self.vid.width, height = self.vid.height)
 
@@ -128,20 +129,33 @@ class App:
 
         if self._state == STATE_MENU:
             if action == ACTION_BUTTON_NEXT:
-                self._state = STATE_FACE
+                self._state = STATE_SKIN_TONE
                 self._button['text'] = 'Next'
+                self._button1.pack(side=LEFT)
+                # Label1.place_forget()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_MENU
             
+        elif self._state == STATE_SKIN_TONE:
+            if action == ACTION_BUTTON_NEXT:
+                self._state = STATE_FACE
+                # call VideoCapture?
+
+            elif action == ACTION_BUTTON_BACK:
+                self._state = STATE_MENU
+                self._button1.pack_forget()
+
         elif self._state == STATE_FACE:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_FACE_BOX
 
-            elif action == ACTION_BUTTON_BACK:
-                self._state = STATE_MENU            
-                self._button['text'] = 'Start'
-               
+            elif action == ACTION_BUTTON_BACK:           
+                self._state = STATE_SKIN_TONE
+                if self.vid.isOpened():
+                    self.vid.release()
+                
+
         elif self._state == STATE_FACE_BOX:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_FACE_BOX_RESULTS
@@ -262,23 +276,46 @@ class App:
         print("State is now {}".format(self._state))
 
     def update(self):
+        print(self._state)
         '''
         Called every self.delay milliseconds
         '''
         if self._state == STATE_MENU:
             Label1 = Label(self.window,text = "Welcome to Annie's Makeup Project!", \
-            width = 20, font=("Helvetica", 16))
+            width = 40, anchor = NW, font=("Helvetica", 16))
 
-            Label1.place(x = 90, y =  50)
-
+            Label1.place(x = 100,y = 50)
             Label2 = Label(self.window, text = "Press Start", width = 20, \
-                     font=("Times New Roman", 12))
+                     font=("Helvetica", 12))
+        
+            Label2.place(x = 200, y = 75)
 
-            Label2.place(x = 150, y = 75)
-        else: # remove label later ok
-            Label1 = Label(self.window, text = f'{}')
+        elif self._state == STATE_SKIN_TONE:
+            # Label1 = Label(self.window,text = "Skin Tone Questionaire",   \
+            # width = 20, font = ("Helvetica", 16))
+            # Label1.place(x = 100, y = 50)
+            Label2 = Label(self.window,text = 'Look at the veins on your wrist',\
+            width = 20, font = ("Helvetica", 16))
+            Label2.place(x = 100, y = 50)
+            Label3 = Label(self.window, text = 'if you mostly see blue/purple veins, \
+            then you are cool toned', width = 20, font = ("Helvetica" ,16))
+            Label3.place(x = 120, y = 75)
+            Label4 = Label(self.window, text = "if you mostly see green veins, \
+            then you're warm toned", width = 20, font = ("Helvetica" , 16))
+            Label4.place(x = 100, y = 75)
+            # (200,300,text = "if you mostly see a blend of \
+            # both blue/purple and green veins, then you're neutral toned")
+            
+            
+             # remove label later ok
+            # Label1 = Label(self.window, text = f'{}')
             # Get a frame from the video source
             # Pass our current state to know which box to draw
+        else:
+           
+            Label1 = Label(self.window, text = "State:{}".format(self._state),\
+                width = 40 , font = ("Helvetica",12))
+
             ret, frame = self.vid.get_frame(self._state)
 
 
@@ -294,6 +331,9 @@ class VideoCapture:
     def __init__(self, video_source=0):
         # Open the video source
         self.vid = cv2.VideoCapture(video_source)
+        print(dir(self.vid))
+
+
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
 
@@ -368,9 +408,10 @@ class VideoCapture:
     def __del__(self):
         if self.vid.isOpened():
             self.vid.release()
+            cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    print('Welcome to Annie\'s Makeup Project!\nPress <Esc> anytime to quit.')
+    print('Application of Beauty \nPress <Esc> anytime to quit.')
 
     # Start tkinter
     App(Tk(), "Makeup")
