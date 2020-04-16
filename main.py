@@ -1,6 +1,5 @@
 import sys, getopt
 import time
-import basic_graphics
 from tkinter import *
 from tkinter.font import Font
 from PIL import Image, ImageTk
@@ -83,6 +82,24 @@ class App:
         # open video source (by default this will try to open the computer webcam)
         self.vid = VideoCapture(self.video_source)
 
+        # creating label outside function, making it a global variable and can be used everywhere
+        l1 = Label(self.window, text = "Application of Beauty", \
+        width = 40, anchor = NW, font=("Helvetica", 16))
+        l2 = Label(self.window,text = "Skin Tone Questionaire",   \
+        width = 20, font = ("Helvetica", 16))
+        l3 = Label(self.window,text = 'Look at the veins on your wrist',\
+        width = 20, font = ("Helvetica", 16))
+        l4 = Label(self.window, text = 'if you mostly see blue/purple veins, then you are cool toned', \
+        width = 20, font = ("Helvetica", 16))
+        l5 = Label(self.window, text = "if you mostly see green veins, \
+        then you're warm toned", width = 20, font = ("Helvetica" , 16))
+        l6 = Label(self.window, text = "if you mostly see a blend of \
+        both blue/purple and green veins, then you're neutral toned", width = 20, \
+        font = ("Helvetica, 16"))
+        l7 = Label(self.window, text = 'Check in one of the boxes that accurately \
+            matches your description', width = 20, font =("Helvetica, 16"))
+        resultlabel1 = Label(self.window)
+
         # create button
         # CITATION: https://www.python-course.eu/tkinter_buttons.php
 
@@ -140,7 +157,6 @@ class App:
         elif self._state == STATE_SKIN_TONE:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_FACE
-                # call VideoCapture?
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_MENU
@@ -154,7 +170,6 @@ class App:
                 self._state = STATE_SKIN_TONE
                 if self.vid.isOpened():
                     self.vid.release()
-                
 
         elif self._state == STATE_FACE_BOX:
             if action == ACTION_BUTTON_NEXT:
@@ -275,42 +290,31 @@ class App:
         '''
         print("State is now {}".format(self._state))
 
+# actually does graphics
     def update(self):
-        print(self._state)
         '''
         Called every self.delay milliseconds
         '''
         if self._state == STATE_MENU:
-            Label1 = Label(self.window,text = "Welcome to Annie's Makeup Project!", \
-            width = 40, anchor = NW, font=("Helvetica", 16))
-
-            Label1.place(x = 100,y = 50)
-            Label2 = Label(self.window, text = "Press Start", width = 20, \
-                     font=("Helvetica", 12))
-        
-            Label2.place(x = 200, y = 75)
-
+            l1.grid(row=0, column=0)
+            # self.canvas.delete("all")
+            # self.title_label.place(x=250, y=0)
+            resultlabel1.config(text=l1)
         elif self._state == STATE_SKIN_TONE:
-            # Label1 = Label(self.window,text = "Skin Tone Questionaire",   \
-            # width = 20, font = ("Helvetica", 16))
-            # Label1.place(x = 100, y = 50)
-            Label2 = Label(self.window,text = 'Look at the veins on your wrist',\
-            width = 20, font = ("Helvetica", 16))
-            Label2.place(x = 100, y = 50)
-            Label3 = Label(self.window, text = 'if you mostly see blue/purple veins, \
-            then you are cool toned', width = 20, font = ("Helvetica" ,16))
-            Label3.place(x = 120, y = 75)
-            Label4 = Label(self.window, text = "if you mostly see green veins, \
-            then you're warm toned", width = 20, font = ("Helvetica" , 16))
-            Label4.place(x = 100, y = 75)
-            # (200,300,text = "if you mostly see a blend of \
-            # both blue/purple and green veins, then you're neutral toned")
-            
-            
-             # remove label later ok
+            l2.grid(row=0,column=0)
+            # self.Label1.place_forget()
+            # self.canvas.delete("all")
+            # self.title_label.place_forget()
+            l3.grid(row=1,column=0)
+            l4.grid(row=2,column=0)
+            l5.grid(row=3,column=0)
+            l6.grid(row=4,column=0)
+            l7.grid(row=5,column=0)
+ 
             # Label1 = Label(self.window, text = f'{}')
             # Get a frame from the video source
             # Pass our current state to know which box to draw
+            self.canvas.delete('all')
         else:
            
             Label1 = Label(self.window, text = "State:{}".format(self._state),\
