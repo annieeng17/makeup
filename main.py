@@ -81,25 +81,23 @@ class App:
         self._state = STATE_MENU
         # open video source (by default this will try to open the computer webcam)
         self.vid = VideoCapture(self.video_source)
-
         # creating label outside function, making it a global variable and can be used everywhere
-        l1 = Label(self.window, text = "Application of Beauty", \
+        self.l1 = Label(self.window, text = "Application of Beauty", \
         width = 40, anchor = NW, font=("Helvetica", 16))
-        l2 = Label(self.window,text = "Skin Tone Questionaire",   \
-        width = 20, font = ("Helvetica", 16))
-        l3 = Label(self.window,text = 'Look at the veins on your wrist',\
-        width = 20, font = ("Helvetica", 16))
-        l4 = Label(self.window, text = 'if you mostly see blue/purple veins, then you are cool toned', \
-        width = 20, font = ("Helvetica", 16))
-        l5 = Label(self.window, text = "if you mostly see green veins, \
-        then you're warm toned", width = 20, font = ("Helvetica" , 16))
-        l6 = Label(self.window, text = "if you mostly see a blend of \
-        both blue/purple and green veins, then you're neutral toned", width = 20, \
+        self.l2 = Label(self.window,text = "Skin Tone Questionaire",   \
+        width = 40, font = ("Helvetica", 16))
+        self.l3 = Label(self.window,text = 'Look at the veins on your wrist',\
+        width = 40, font = ("Helvetica", 16))
+        self.l4 = Label(self.window, text = 'if you mostly see blue/purple veins, then you are cool toned', \
+        width = 40, font = ("Helvetica", 16))
+        self.l5 = Label(self.window, text = "if you mostly see green veins, \
+        then you're warm toned", width = 40, font = ("Helvetica" , 16))
+        self.l6 = Label(self.window, text = "if you mostly see a blend of \
+        both blue/purple and green veins, then you're neutral toned", width = 40, \
         font = ("Helvetica, 16"))
-        l7 = Label(self.window, text = 'Check in one of the boxes that accurately \
-            matches your description', width = 20, font =("Helvetica, 16"))
-        resultlabel1 = Label(self.window)
-
+        self.l7 = Label(self.window, text = 'Check in one of the boxes that accurately \
+            matches your description', width = 40, font =("Helvetica, 16"))
+        self.resultlabel1 = Label(self.window)
         # create button
         # CITATION: https://www.python-course.eu/tkinter_buttons.php
 
@@ -111,7 +109,8 @@ class App:
                    text='Start', 
                    fg="black",
                    command=self.button_func)
-        self._button.pack(side=RIGHT)
+        #self._button.pack(side=RIGHT)
+        self._button.grid(row=4, column=1)
         self._button['font'] = self.myFont
         self._button1 = Button(self.window, 
                 text='Back', 
@@ -126,7 +125,8 @@ class App:
         # Respond to clicks
         self.canvas.bind("<Button-1>", self.callback_mouse)
 
-        self.canvas.pack()
+        #self.canvas.pack()
+        self.canvas.grid()
 
         # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
@@ -148,8 +148,8 @@ class App:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_SKIN_TONE
                 self._button['text'] = 'Next'
-                self._button1.pack(side=LEFT)
-                # Label1.place_forget()
+                #self._button1.pack(side=LEFT)
+                self._button1.grid(row=0, column=1)
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_MENU
@@ -160,7 +160,15 @@ class App:
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_MENU
-                self._button1.pack_forget()
+                #self._button1.pack_forget()
+                self._button1.grid_forget()
+                self.l2.grid_remove()
+                self.l3.grid_remove()
+                self.l4.grid_remove()
+                self.l4.grid_remove()
+                self.l5.grid_remove()
+                self.l6.grid_remove()
+                self.l7.grid_remove()
 
         elif self._state == STATE_FACE:
             if action == ACTION_BUTTON_NEXT:
@@ -295,30 +303,38 @@ class App:
         '''
         Called every self.delay milliseconds
         '''
+        global resultlabel1
         if self._state == STATE_MENU:
-            l1.grid(row=0, column=0)
-            # self.canvas.delete("all")
-            # self.title_label.place(x=250, y=0)
-            resultlabel1.config(text=l1)
+            self.l1.grid(row=0, column=0)
+            self.resultlabel1.config(text=self.l1)
         elif self._state == STATE_SKIN_TONE:
-            l2.grid(row=0,column=0)
+            self.l1.grid_remove()
+
+            self.l2.grid(row=0,column=0)
             # self.Label1.place_forget()
             # self.canvas.delete("all")
             # self.title_label.place_forget()
-            l3.grid(row=1,column=0)
-            l4.grid(row=2,column=0)
-            l5.grid(row=3,column=0)
-            l6.grid(row=4,column=0)
-            l7.grid(row=5,column=0)
- 
+            self.l3.grid(row=1,column=0)
+            self.l4.grid(row=2,column=0)
+            self.l5.grid(row=3,column=0)
+            self.l6.grid(row=4,column=0)
+            self.l7.grid(row=5,column=0)
+            self.resultlabel1.config(text=self.l2)
             # Label1 = Label(self.window, text = f'{}')
             # Get a frame from the video source
             # Pass our current state to know which box to draw
-            self.canvas.delete('all')
+            # self.canvas.delete('all')
         else:
-           
+            self.l2.grid_remove()
+            self.l3.grid_remove()
+            self.l4.grid_remove()
+            self.l4.grid_remove()
+            self.l5.grid_remove()
+            self.l6.grid_remove()
+            self.l7.grid_remove()
+
             Label1 = Label(self.window, text = "State:{}".format(self._state),\
-                width = 40 , font = ("Helvetica",12))
+            width = 40 , font = ("Helvetica",12))
 
             ret, frame = self.vid.get_frame(self._state)
 
