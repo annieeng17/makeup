@@ -95,9 +95,20 @@ def find_cheek_bones(rects):
 def find_avg_color(img, x, y):
     # turns into a numpy list, better than normal lists. can't do in python
     delta = 3
+    numPoint = 5
+    center = np.array(img[y,x])
     upperLeft = np.array(img[y-delta,x-delta])
     upperRight = np.array(img[y-delta,x+delta])
     lowerLeft = np.array(img[y+delta, x-delta])
     lowerRight = np.array(img[y+delta, x+delta])
-    average = (upperLeft + upperRight+ lowerLeft+ lowerRight)/4
+    average = (center+upperLeft + upperRight+ lowerLeft+ lowerRight)/numPoint
     return average
+
+def get_center_rect(rect):
+    x1, y1, x2, y2 = rect
+    return int((x1+x2)/2), int((y1+y2)/2)
+'''
+def avg_color_cheeks(rects,img, x,y):
+    find_cheeks(rects)
+    find_avg_color(img,x,y)
+'''

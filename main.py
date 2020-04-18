@@ -73,16 +73,20 @@ class App:
     # TODO: you should use an enum for this for different states
     _state = 0
 
-    def __init__(self, window, window_title, video_source=0):
+    def __init__(self, window, window_title, video_source = 0): # many video sources, which camera are we using
         self.window = window
+        self.window.minsize(500,500) 
         self.window.title(window_title)
-        self.window.bind('<Escape>', lambda e: self.window.quit())
+        self.window.bind('<Escape>', lambda e: self.window.quit()) # can't write def in one line, make it as e
         self.video_source = video_source
         self._state = STATE_MENU
+        # self.last_time_clicked = time()
         # open video source (by default this will try to open the computer webcam)
         self.vid = VideoCapture(self.video_source)
         self.window.configure(bg ='RosyBrown1')
         # creating label outside function, making it a global variable and can be used everywhere
+        self.Heading1 = Label(self.window, text = "State:{}".format(self._state),\
+        width = 40 , font = ("Helvetica",20), bg = 'RosyBrown1', pady = 2)
         self.l1 = Label(self.window, text = "Application of Beauty", \
         width = 17, anchor = CENTER, font=("Helvetica", 16), bg = 'RosyBrown1', pady = 2)
         self.l2 = Label(self.window,text = "Skin Tone Questionaire",   \
@@ -95,11 +99,13 @@ class App:
         " you're warm toned", width = 47, anchor = NW, font = ("Helvetica" , 16), bg = 'RosyBrown1', pady = 2)
         self.l6 = Label(self.window, text = "If you mostly see a blend of" \
         " both blue/purple and green veins,", width = 47, anchor = NW, font = ("Helvetica, 16"),\
-        bg = 'RosyBrown1')
+        bg = 'RosyBrown1', pady = 2)
         self.l7 = Label(self.window, text = " then you're neutral toned", \
-        width = 40, anchor = NW, font = ("Helvetica" , 16))    
+        width = 20, anchor = W, font = ("Helvetica" , 16), bg = 'RosyBrown1', pady = 2)    
         self.l8 = Label(self.window, text = 'Check in one of the boxes that accurately' \
-        ' matches your description', width = 40, anchor = NW, font =("Helvetica", 16))
+        ' matches your', width = 47, anchor = NW, font =("Helvetica", 16),bg = 'RosyBrown1', pady = 2)
+        self.l9 = Label(self.window, text = 'description', width = 20, anchor = NW, font =("Helvetica", 16),\
+        bg = 'RosyBrown1', pady = 2)
         self.resultlabel1 = Label(self.window)
         # create button
         # CITATION: https://www.python-course.eu/tkinter_buttons.php
@@ -108,35 +114,54 @@ class App:
         self.text = Text(self.window)
         self.myFont = Font(family = 'New Courier')
         self.text.configure(font = self.myFont)
-        self._button = Button(self.window, 
+        self._button_start = Button(self.window, 
                    text = 'Start', 
                    fg = "black",
                    bg ='lavender',
                    command=self.button_func)
-        #self._button.pack(side=RIGHT)
-        self._button.grid(row = 4, column = 1)
-        self._button['font'] = self.myFont
-        self._button1 = Button(self.window, 
+        self._button_start['font'] = self.myFont
+        self._button_next = Button(self.window, 
+                   text = 'Next', 
+                   fg = "black",
+                   bg ='lavender',
+                   command=self.button_func)
+        self._button_next['font'] = self.myFont
+        self._button_back = Button(self.window, 
                 text = 'Back', 
                 fg = "black",
                 bg ='lavender',
                 command=self.button_func_back)
-        self._button1.grid(row = 4, column = 0)
-        self._button1['font'] = self.myFont
+        # self._button_back.grid(row = 4, column = 2)
+        self._button_back['font'] = self.myFont
+        self._button_cool = Button(self.window,
+                text = 'Cool', 
+                fg = "black",
+                bg ='lavender',
+                command= lambda: self.button_func_tone(SKINTONE_COOL))
+        self._button_warm = Button(self.window,
+                text = 'Warm', 
+                fg = "black",
+                bg ='lavender',
+                command = lambda:self.button_func_tone(SKINTONE_WARM))
+        self._button_neutral = Button(self.window,
+                text = 'Neutral', 
+                fg = "black",
+                bg ='lavender',
+                command = lambda: self.button_func_tone(SKINTONE_NEUTRAL))       
         
         # Create a canvas that can fit the above video source size
         self.canvas = Canvas(window, width = self.vid.width, height = self.vid.height)
 
+        
         # Respond to clicks
         self.canvas.bind("<Button-1>", self.callback_mouse)
 
         #self.canvas.pack()
-        self.canvas.grid()
+        # self.canvas.grid()
 
         # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
         self.update()
-
         self.window.mainloop()
     
     def update_fsm(self, action):
@@ -154,7 +179,7 @@ class App:
                 self._state = STATE_SKIN_TONE
                 self._button['text'] = 'Next'
                 #self._button1.pack(side=LEFT)
-                self._button1.grid(row=0, column=1)
+                # self._button_start.grid(row=0, column=1)
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_MENU
@@ -162,10 +187,12 @@ class App:
         elif self._state == STATE_SKIN_TONE:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_FACE
+                self.canvas.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_MENU
-                self._button1.grid_forget()
+                self._button_start.grid_forget()
+                self.Heading1.grid_remove()
                 self.l2.grid_remove()
                 self.l3.grid_remove()
                 self.l4.grid_remove()
@@ -174,6 +201,7 @@ class App:
                 self.l6.grid_remove()
                 self.l7.grid_remove()
                 self.l8.grid_remove()
+                self.l9.grid_remove()
 
         elif self._state == STATE_FACE:
             if action == ACTION_BUTTON_NEXT:
@@ -181,9 +209,8 @@ class App:
 
             elif action == ACTION_BUTTON_BACK:           
                 self._state = STATE_SKIN_TONE
-                if self.vid.isOpened():
-                    self.vid.release()
-
+                self.canvas.grid_remove()
+                
         elif self._state == STATE_FACE_BOX:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_FACE_BOX_RESULTS
@@ -285,13 +312,22 @@ class App:
         Invoked when the start/next button is clicked
         '''
         self.update_fsm(ACTION_BUTTON_NEXT)
-        
+        currTime = time()
+        # check if enough time has passed to press the button
+        if (currTime - self._button_last_clicked > BUTTON_TIME_REQUIRED):
+            self.update_fsm(ACTION_BUTTON_NEXT)
+            # update the last time we clicked
+            self._button_last_clicked = currTime
+
     def button_func_back(self):
         '''
         Invoked when the start/next button is clicked
         '''  
         self.update_fsm(ACTION_BUTTON_BACK)
 
+    def button_func_tone(self,tone):
+        self._tone = tone
+        print('tone',self._tone)
     def callback_mouse(self, event):
         self._state += 1
         print("clicked at", event.x, event.y)
@@ -310,28 +346,42 @@ class App:
         '''
         global resultlabel1
         if self._state == STATE_MENU:
-            self.l1.grid(row=0, column=0)
+            self._button_start.grid(row = 5, column = 0)
+            self.l1.grid(row=0, column=5)
+            # self.video_source.grid_remove()
+            self.Heading1.grid_remove()
+            self._button_next.grid_remove()
+            self._button_back.grid_remove()
+            self._button_back.grid_remove()
+            self._button_cool.grid_remove()
+            self._button_neutral.grid_remove()
+            self._button_warm.grid_remove()
             self.resultlabel1.config(text=self.l1)
-            # self.video_source.grid_remove()
-            self._button1.grid_remove()
-        elif self._state == STATE_SKIN_TONE:
-            self.l1.grid_remove()
-            # self.video_source.grid_remove()
-            self.l2.grid(row=0,column=0)
-            # self.Label1.place_forget()
             # self.canvas.delete("all")
-            # self.title_label.place_forget()
-            self.l3.grid(row=1,column=0)
-            self.l4.grid(row=2,column=0)
-            self.l5.grid(row=3,column=0)
-            self.l6.grid(row=4,column=0)
-            self.l7.grid(row=5,column=0)
-            self.l8.grid(row=6,column=0)
-            self.resultlabel1.config(text=self.l2)
+            rect = self.canvas.create_rectangle(50,25,150,75,fill = 'RosyBrown1')
+        elif self._state == STATE_SKIN_TONE:
+            self.Heading1.grid_remove()
+            self._button_next.grid(row = 4, column = 2)
+            self._button_back.grid(row = 4, column = 0)
+            self._button_start.grid_remove()
+            self.l1.grid_remove()
+            self.l2.grid(row = 0,column = 1)
+            self.l3.grid(row = 1,column = 1)
+            self.l4.grid(row = 2,column = 1)
+            self.l5.grid(row = 3,column = 1)
+            self.l6.grid(row = 4,column = 1)
+            self.l7.grid(row = 5,column = 1)
+            self.l8.grid(row = 6,column = 1)
+            self.l9.grid(row = 7,column = 1)
+            self._button_cool.grid(row = 10, column = 0)
+            self._button_neutral.grid(row = 10, column = 1)
+            self._button_warm.grid(row = 10, column = 2)
+            self.resultlabel1.config(text = self.l2)
             # Label1 = Label(self.window, text = f'{}')
             # Get a frame from the video source
             # Pass our current state to know which box to draw
         else:
+            self.Heading1.grid(row = 0, column = 0)
             self.l2.grid_remove()
             self.l3.grid_remove()
             self.l4.grid_remove()
@@ -340,9 +390,12 @@ class App:
             self.l6.grid_remove()
             self.l7.grid_remove()
             self.l8.grid_remove()
-
-            Label1 = Label(self.window, text = "State:{}".format(self._state),\
-            width = 40 , font = ("Helvetica",12))
+            self.l9.grid_remove()
+            self._button_cool.grid_remove()
+            self._button_neutral.grid_remove()
+            self._button_warm.grid_remove()
+            # Label1 = Label(self.window, text = "State:{}".format(self._state),\
+            # width = 40 , font = ("Helvetica",12))
 
             ret, frame = self.vid.get_frame(self._state)
 
@@ -379,8 +432,8 @@ class VideoCapture:
 
     def get_frame(self,state):
         if self.vid.isOpened():
-            ret, img = self.vid.read()
-
+            ret, img = self.vid.read() #abbreviation for return
+            # if return is not 0
             # If the camera has successfully picked up an image
             if ret:
                 # Process image from webcam
