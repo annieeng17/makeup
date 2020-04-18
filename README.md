@@ -24,14 +24,24 @@ face and generates/recommends a color
 each and then detecting the color/outputting the result as the step after each 
 one
 
--Specifically STATE_SKIN_TONE doesn't use the webcam but it asks the user 
+- Specifically STATE_SKIN_TONE doesn't use the webcam but it asks the user 
 whether they're cool, warm or neutral tones based on a series of questions
 
 ## Color Palette
 
--extract average skin tone color within a shape and generate what color suits 
+- extract average skin tone color within a shape and generate what color suits 
 best for that certain facial feature
 
 - cheeks, lips, eyes
 
 - highlighter: upper cheek, contour: cheek color, a little bit darker
+
+- should make a gradient/transparency color scale for each facial feature for 
+better user experience and style
+
+## Bugs to fix 
+
+- when you click the back button on the screen to go back to START_MENU, it 
+freezes, fix it somehow. FIXED
+
+- also remove the logo when it goes to the face menu and so on. FIXED
