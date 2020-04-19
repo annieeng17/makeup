@@ -92,21 +92,46 @@ def find_cheek_bones(rects):
     
     return cheek_bones
 
+def get_center_rect(rect):
+    x1, y1, x2, y2 = rect
+    return int((x1+x2)/2), int((y1+y2)/2)
+
 def find_avg_color(img, x, y):
     # turns into a numpy list, better than normal lists. can't do in python
     delta = 3
     numPoint = 5
-    center = np.array(img[y,x])
-    upperLeft = np.array(img[y-delta,x-delta])
-    upperRight = np.array(img[y-delta,x+delta])
-    lowerLeft = np.array(img[y+delta, x-delta])
-    lowerRight = np.array(img[y+delta, x+delta])
-    average = (center+upperLeft + upperRight+ lowerLeft+ lowerRight)/numPoint
-    return average
+    colors = []
+    colors.append(np.array(img[y-delta, x-delta]))
+    colors.append(np.array(img[y-delta, x+delta]))
+    colors.append(np.array(img[y+delta, x-delta]))
+    colors.append(np.array(img[y+delta, x+delta]))
 
-def get_center_rect(rect):
-    x1, y1, x2, y2 = rect
-    return int((x1+x2)/2), int((y1+y2)/2)
+    # Find average, but remove outliers
+    OUTLIER_STD_DEV = 10
+    average = np.average(colors, axis=0)
+
+    print('Average color before {}'.format(average))
+
+    real_colors = []
+
+    for c in colors:
+        # adapted and used from : https://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.norm.html
+        #  function returns 1 of 8 different matrix norms depending on the value of the ord parameter.
+        if np.linalg.norm(c - average) < OUTLIER_STD_DEV:
+            real_colors.append(c)
+
+    averageAfter = np.average(real_colors, axis=0) # axis takes in tuple
+
+    print('Average color after {}'.format(averageAfter))
+    # adapted and used from : https://docs.scipy.org/doc/numpy/reference/generated/numpy.isnan.html
+    # returns result as a boolen array
+    if np.isnan(averageAfter):
+        return average
+    else:
+        return averageAfter
+
+
+
 '''
 def avg_color_cheeks(rects,img, x,y):
     find_cheeks(rects)

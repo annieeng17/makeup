@@ -1,5 +1,5 @@
 import sys, getopt
-import time
+from time import time
 from tkinter import *
 from tkinter.font import Font
 from PIL import Image, ImageTk
@@ -80,7 +80,8 @@ class App:
         self.window.bind('<Escape>', lambda e: self.window.quit()) # can't write def in one line, make it as e
         self.video_source = video_source
         self._state = STATE_MENU
-        # self.last_time_clicked = time()
+        self.last_time_clicked = time()
+        self._button_last_clicked =
         # open video source (by default this will try to open the computer webcam)
         self.vid = VideoCapture(self.video_source)
         self.window.configure(bg ='RosyBrown1')
@@ -150,6 +151,8 @@ class App:
                 command = lambda: self.button_func_tone(SKINTONE_NEUTRAL))       
         
         # Create a canvas that can fit the above video source size
+        # CITATION: https://solarianprogrammer.com/2018/04/21/python-opencv-show-video-tkinter-window/
+        # used and altered accordingly
         self.canvas = Canvas(window, width = self.vid.width, height = self.vid.height)
 
         
@@ -177,9 +180,7 @@ class App:
         if self._state == STATE_MENU:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_SKIN_TONE
-                self._button['text'] = 'Next'
-                #self._button1.pack(side=LEFT)
-                # self._button_start.grid(row=0, column=1)
+                # self._button['text'] = 'Next'
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_MENU
@@ -306,7 +307,6 @@ class App:
 
         print('Action: {} New State:{}'.format(action, self._state))
 
-
     def button_func(self): 
         '''
         Invoked when the start/next button is clicked
@@ -330,8 +330,7 @@ class App:
         print('tone',self._tone)
     def callback_mouse(self, event):
         self._state += 1
-        print("clicked at", event.x, event.y)
-
+        print("clicked at", event.x, event.y) 
         
         '''
         You can do something like if the click is within some region,
@@ -452,20 +451,47 @@ class VideoCapture:
                     
                 if state == STATE_FACE_BOX:
                     draw_rects(vis, rects, (0, 255, 0))
-                # elif state == STATE_SKIN_TONE:
-
+                elif state == STATE_SKIN_TONE:
+                    draw_rects(vis, rects, (0, 255, 0))
+                    if len(rects) > 0:
+                        cX, cY = get_center_rect(rects[0])
+                        find_avg_color(vis, cX, cY)
                 elif state == STATE_BLUSH:  
                     cheek_rects = find_cheeks(rects)   
                     draw_rects(vis,cheek_rects,(0, 0, 255))
+                elif state == STATE_BLUSH_RESULTS:
+                    cheek_rects = find_cheeks(rects)   
+                    draw_rects(vis,cheek_rects,(0, 0, 255))
+                    if len(rects) > 0:
+                        cX, cY = get_center_rect(rects[0])
+                        find_avg_color(vis, cX, cY)
                 elif state == STATE_HIGHLIGHTER:
                     upper_cheeks = find_upper_cheeks(rects)
                     draw_triangle(vis,upper_cheeks,(255,255,0),thickness = 1)
+                elif state == STATE_HIGHLIGHTER_RESULTS:
+                    upper_cheeks = find_upper_cheeks(rects)
+                    draw_triangle(vis,upper_cheeks,(255,255,0),thickness = 1)
+                    if len(rects) > 0:
+                        cX, cY = get_center_rect(rects[0])
+                        find_avg_color(vis, cX, cY)
                 elif state == STATE_CONTOUR:
                     cheek_bones = find_cheek_bones(rects)
                     draw_triangle(vis,cheek_bones,(0,255,255),thickness = 1)
+                elif state == STATE_CONTOUR_RESULTS:
+                    cheek_bones = find_cheek_bones(rects)
+                    draw_triangle(vis,cheek_bones,(0,255,255),thickness = 1)
+                    if len(rects) > 0:
+                        cX, cY = get_center_rect(rects[0])
+                        find_avg_color(vis, cX, cY)
                 elif state == STATE_LIP:
                     lip_ellipses = find_lips(rects)
                     draw_ellipses(vis, lip_ellipses,(255,0,255),thickness = 1)
+                elif state == STATE_LIP_RESULTS:
+                    lip_ellipses = find_lips(rects)
+                    draw_ellipses(vis, lip_ellipses,(255,0,255),thickness = 1)
+                    if len(rects) > 0:
+                        cX, cY = get_center_rect(rects[0])
+                        find_avg_color(vis, cX, cY)
                 elif state == STATE_EYES:
                     # Eye detection
                     if not self.nested.empty():
