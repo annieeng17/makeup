@@ -5,7 +5,6 @@ from tkinter.font import Font
 from PIL import Image, ImageTk
 from constants import *
 import cv2
-
 from opencvLib import *
 from makeupLib import *
 # creating the stuff to put into tkinter
@@ -30,7 +29,6 @@ def detect(img, cascade):
 def draw_rects(img, rects, color):
     '''
     Draws the rectangles defined by rects on img
-
     param img: image to draw rectangles on
     param rects: list of rectangles to draw, format [(x1, y1, x2, y2), ...]
     param color: color to draw the rectangles, (R, G, B) coordinate.
@@ -42,7 +40,6 @@ def draw_rects(img, rects, color):
 def draw_ellipses(img, ellipses, color,thickness):
     '''
     Draws the rectangles defined by rects on img
-
     param img: image to draw rectangles on
     param rects: list of rectangles to draw, format [(x1, y1, x2, y2), ...]
     param color: color to draw the rectangles, (R, G, B) coordinate.
@@ -56,7 +53,6 @@ def draw_ellipses(img, ellipses, color,thickness):
 # cv2.line(img, p1, p2, (255, 0, 0), 3)
 def draw_triangle(img,triangle,color,thickness):
     '''
-
     Creates 3 coordinates defined by rects on img
     param img: image to draw rectangles on
     param rects: list of rectangles to draw, format [(x1, y1, x2, y2), ...]
@@ -66,7 +62,6 @@ def draw_triangle(img,triangle,color,thickness):
         cv2.line(img,(pt_x1, pt_y1),(pt_x2, pt_y2), color,thickness)
         cv2.line(img,(pt_x2, pt_y2),(pt_x3, pt_y3), color,thickness)
         cv2.line(img,(pt_x3, pt_y3),(pt_x1, pt_y1), color,thickness)
-
 
 class App:
     # Keep track of what state your program is in
@@ -80,8 +75,7 @@ class App:
         self.window.bind('<Escape>', lambda e: self.window.quit()) # can't write def in one line, make it as e
         self.video_source = video_source
         self._state = STATE_MENU
-        self.last_time_clicked = time()
-        self._button_last_clicked =
+        self._button_last_clicked = time()
         # open video source (by default this will try to open the computer webcam)
         self.vid = VideoCapture(self.video_source)
         self.window.configure(bg ='RosyBrown1')
@@ -107,6 +101,8 @@ class App:
         ' matches your', width = 47, anchor = NW, font =("Helvetica", 16),bg = 'RosyBrown1', pady = 2)
         self.l9 = Label(self.window, text = 'description', width = 20, anchor = NW, font =("Helvetica", 16),\
         bg = 'RosyBrown1', pady = 2)
+        self.l10 = Label(self.window, text = 'User must be in bright lighting for application to correctly work',\
+        width = 47, anchor = NW, font =("Helvetica", 16), bg = 'RosyBrown1', pady = 2)
         self.resultlabel1 = Label(self.window)
         # create button
         # CITATION: https://www.python-course.eu/tkinter_buttons.php
@@ -132,7 +128,6 @@ class App:
                 fg = "black",
                 bg ='lavender',
                 command=self.button_func_back)
-        # self._button_back.grid(row = 4, column = 2)
         self._button_back['font'] = self.myFont
         self._button_cool = Button(self.window,
                 text = 'Cool', 
@@ -155,11 +150,9 @@ class App:
         # used and altered accordingly
         self.canvas = Canvas(window, width = self.vid.width, height = self.vid.height)
 
-        
         # Respond to clicks
         self.canvas.bind("<Button-1>", self.callback_mouse)
 
-        #self.canvas.pack()
         # self.canvas.grid()
 
         # After it is called once, the update method will be automatically called every delay milliseconds
@@ -203,6 +196,7 @@ class App:
                 self.l7.grid_remove()
                 self.l8.grid_remove()
                 self.l9.grid_remove()
+                self.l10.grid_remove()
 
         elif self._state == STATE_FACE:
             if action == ACTION_BUTTON_NEXT:
@@ -311,8 +305,8 @@ class App:
         '''
         Invoked when the start/next button is clicked
         '''
-        self.update_fsm(ACTION_BUTTON_NEXT)
         currTime = time()
+        # self.BUTTON_TIME_REQUIRED = 500
         # check if enough time has passed to press the button
         if (currTime - self._button_last_clicked > BUTTON_TIME_REQUIRED):
             self.update_fsm(ACTION_BUTTON_NEXT)
@@ -323,7 +317,10 @@ class App:
         '''
         Invoked when the start/next button is clicked
         '''  
-        self.update_fsm(ACTION_BUTTON_BACK)
+        currTime = time()
+        if (currTime - self._button_last_clicked > BUTTON_TIME_REQUIRED):
+            self._button_last_clicked = currTime
+            self.update_fsm(ACTION_BUTTON_BACK)
 
     def button_func_tone(self,tone):
         self._tone = tone
@@ -372,6 +369,7 @@ class App:
             self.l7.grid(row = 5,column = 1)
             self.l8.grid(row = 6,column = 1)
             self.l9.grid(row = 7,column = 1)
+            self.l10.grid(row = 8, column = 1)
             self._button_cool.grid(row = 10, column = 0)
             self._button_neutral.grid(row = 10, column = 1)
             self._button_warm.grid(row = 10, column = 2)
@@ -390,29 +388,27 @@ class App:
             self.l7.grid_remove()
             self.l8.grid_remove()
             self.l9.grid_remove()
+            self.l10.grid_remove()
             self._button_cool.grid_remove()
             self._button_neutral.grid_remove()
             self._button_warm.grid_remove()
             # Label1 = Label(self.window, text = "State:{}".format(self._state),\
             # width = 40 , font = ("Helvetica",12))
+            try:
+                ret, frame = self.vid.get_frame(self._state)
 
-            ret, frame = self.vid.get_frame(self._state)
-
-
-
-            if ret:
-                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
-                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
-
-        self.window.after(self.delay, self.update)
-
+                if ret:
+                    self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
+                    self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
+                else:
+                    print("Error : Camera in use")
+                    self.window.after(self.delay, self.update)
 
 class VideoCapture:
     def __init__(self, video_source=0):
         # Open the video source
         self.vid = cv2.VideoCapture(video_source)
         print(dir(self.vid))
-
 
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
@@ -431,7 +427,10 @@ class VideoCapture:
 
     def get_frame(self,state):
         if self.vid.isOpened():
-            ret, img = self.vid.read() #abbreviation for return
+            try:
+                ret, img = self.vid.read() #abbreviation for return
+            else:
+                print("camera cannot be run")
             # if return is not 0
             # If the camera has successfully picked up an image
             if ret:
