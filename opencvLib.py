@@ -1,5 +1,7 @@
 import cv2 as cv
 import numpy as np
+import math
+from makeupLib import *
 def find_cheeks (rects):
     '''
     Converts the rectangles in rects to cheek rectangles
@@ -101,6 +103,7 @@ def find_avg_color(img, x, y):
     delta = 3
     numPoint = 5
     colors = []
+    colors.append(np.array(img[y,x]))
     colors.append(np.array(img[y-delta, x-delta]))
     colors.append(np.array(img[y-delta, x+delta]))
     colors.append(np.array(img[y+delta, x-delta]))
@@ -108,7 +111,9 @@ def find_avg_color(img, x, y):
 
     # Find average, but remove outliers
     OUTLIER_STD_DEV = 10
-    average = np.average(colors, axis=0)
+    # computes the weighted average on an axis
+    # adapted and used from : https://docs.scipy.org/doc/numpy/reference/generated/numpy.average.html
+    average = np.average(colors, axis=0) # tells which axis/dimenstion to operate on
 
     print('Average color before {}'.format(average))
 
@@ -116,24 +121,42 @@ def find_avg_color(img, x, y):
 
     for c in colors:
         # adapted and used from : https://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.norm.html
-        #  function returns 1 of 8 different matrix norms depending on the value of the ord parameter.
+        # finds Euclidean distance between two vectors
+        # takes the average color and gets rid of the outlier color
         if np.linalg.norm(c - average) < OUTLIER_STD_DEV:
             real_colors.append(c)
 
-    averageAfter = np.average(real_colors, axis=0) # axis takes in tuple
+    averageAfter = np.average(real_colors, axis=0) 
 
     print('Average color after {}'.format(averageAfter))
     # adapted and used from : https://docs.scipy.org/doc/numpy/reference/generated/numpy.isnan.html
-    # returns result as a boolen array
+    # returns result as a boolean array, detects if you get nan
+    # stands for not a number, special point value
+    # image can be a nans
     if np.isnan(averageAfter):
         return average
     else:
         return averageAfter
 
+def closest_value(listOfVectors, vector):
+    close_dist = None
+    close_val = None
+    for rgb in listOfVectors:
+        curr_dist = getDistance(rgb, vector)
+        if curr_dist == None:
+            close_dist = curr_dist
+        elif curr_dist < close_dist:
+            close_dist = curr_dist
+    # calculate which element in listOfVectors that vector is closest to and return that
 
+def getDistance(v1, v2):
+    sum = 0
+    for i in range(len(v1)):
+        sum += (v1[i] - v2[i])**2
+    return math.sqrt(sum)
 
-'''
-def avg_color_cheeks(rects,img, x,y):
-    find_cheeks(rects)
-    find_avg_color(img,x,y)
-'''
+TONE_FAIR   = (211, 231, 255) 
+TONE_LIGHT  = (185, 224, 255)
+TONE_MEDIUM = (142, 191, 239)
+TONE_TAN    = (120, 174, 237)
+TONE_DEEP   = ( 84, 134, 180)
