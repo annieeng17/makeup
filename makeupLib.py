@@ -1,4 +1,3 @@
-# def STATE_SKINTONE:
 # draw_rects(vis, rects, (0, 255, 0))
 # call on average color function and find the color, 
 # if color is closest to fair then fair, 
@@ -7,6 +6,13 @@
 # if color is closest to tan then tan, 
 # if color is closest to deep then deep, 
 
+# def Find_SkinTone:
+    
+'''
+description for fair skin for highlighter. opt for light colored highlighters.
+should opt for highlighters with a pearlescent, icy silver or champagne sheen.
+ adds just enough radiance to your complexion.
+'''
 TONE_FAIR   = (211, 231, 255) 
 TONE_LIGHT  = (185, 224, 255)
 TONE_MEDIUM = (142, 191, 239)
@@ -22,6 +28,8 @@ FEATURE_CHEEK_BONES = 'CONTOUR'
 UNDERTONE_COOL    = 'UT_COOL'
 UNDERTONE_WARM    = 'UT_WARM'
 UNDERTONE_NEUTRAL = 'UT_NEUTRAL'
+
+# SKINTONES[TONE_FAIR][FEATURE_CHEEKS][UNDERTONE_COOL]
 '''
 A dictionary that tells the user what shade they are right away after inputting
 their information
@@ -37,6 +45,21 @@ COLOR_PALETTE = {
             UNDERTONE_COOL: (0, 0, 0),   #
             UNDERTONE_WARM: (0, 0, 0),   #
             UNDERTONE_NEUTRAL: (0, 0, 0) #
+        },
+        FEATURE_UPPER_CHEEKS: {
+            UNDERTONE_COOL: (0, 0, 0),        #Pearl 
+            UNDERTONE_WARM: (204, 255, 255),  #Cream
+            UNDERTONE_NEUTRAL: (251, 145, 245)#Rose Quartz
+        },
+        FEATURE_CHEEK_BONES: {
+            UNDERTONE_COOL: (148, 169, 207),  #Light Taupe 
+            UNDERTONE_WARM: (131, 157, 192),  #Sombre
+            UNDERTONE_NEUTRAL: (140, 166, 196)#Fawn
+        },
+        FEATURE_LIPS: {
+            UNDERTONE_COOL: (142, 143, 246),   #Pink Sands
+            UNDERTONE_WARM: (139, 143, 219),   #Rum Punch
+            UNDERTONE_NEUTRAL: (135, 151, 237) #Pink Lemonade
         }
     },
     TONE_LIGHT : {
@@ -49,6 +72,21 @@ COLOR_PALETTE = {
             UNDERTONE_COOL: (0, 0, 0),
             UNDERTONE_WARM: (0, 0, 0),
             UNDERTONE_NEUTRAL: (0, 0, 0)
+        },
+        FEATURE_UPPER_CHEEKS: {
+            UNDERTONE_COOL: (216, 220, 245),  #Vanilla Quartz
+            UNDERTONE_WARM: (202, 221, 234),  #Peacky Keen
+            UNDERTONE_NEUTRAL: (209, 214, 255)#Peach Schnapps
+        },
+        FEATURE_CHEEK_BONES: {
+            UNDERTONE_COOL: (121, 139, 180),  #Fire 
+            UNDERTONE_WARM: (87, 108, 135),   #Cappuccino
+            UNDERTONE_NEUTRAL: (109, 132, 164)#Cocoa
+        },
+        FEATURE_LIPS: {
+            UNDERTONE_COOL: (118, 137, 212),   #Sun Kissed
+            UNDERTONE_WARM: (101, 122, 201),   #Colada
+            UNDERTONE_NEUTRAL: (153, 141, 212) #Salt Lyfe
         }
     },
     TONE_MEDIUM : {
@@ -61,6 +99,21 @@ COLOR_PALETTE = {
             UNDERTONE_COOL: (0, 0, 0),
             UNDERTONE_WARM: (0, 0, 0),
             UNDERTONE_NEUTRAL: (0, 0, 0)
+        },
+        FEATURE_UPPER_CHEEKS: {
+            UNDERTONE_COOL: (191, 214, 255),  #Moonstone
+            UNDERTONE_WARM: (206, 231, 247),  #Champagne Pop
+            UNDERTONE_NEUTRAL: (177, 195, 255)#Prismatic Amethyst
+        },
+        FEATURE_CHEEK_BONES: {
+            UNDERTONE_COOL: (105, 135, 198),  #Gienah
+            UNDERTONE_WARM: (112, 128, 174),  #Java
+            UNDERTONE_NEUTRAL: (106, 118, 246)#Paloma
+        },
+        FEATURE_LIPS: {
+            UNDERTONE_COOL: (113, 119, 188),   #Siesta
+            UNDERTONE_WARM: (109, 116, 198),   #5 0'Clock
+            UNDERTONE_NEUTRAL: (115, 115, 202) #Set Sail
         }
     },
     TONE_TAN : {
@@ -73,6 +126,21 @@ COLOR_PALETTE = {
             UNDERTONE_COOL: (0, 0, 0),
             UNDERTONE_WARM: (0, 0, 0),
             UNDERTONE_NEUTRAL: (0, 0, 0)
+        },
+        FEATURE_UPPER_CHEEKS: {
+            UNDERTONE_COOL: (188, 206, 229),  #Shimmer
+            UNDERTONE_WARM: (162, 187, 216),  #Prosecco Pop
+            UNDERTONE_NEUTRAL: (167, 193, 230)#Butterscotch
+        },
+        FEATURE_CHEEK_BONES: {
+            UNDERTONE_COOL: (110, 143, 212),  #Vallarta
+            UNDERTONE_WARM: (92, 127, 177),   #Havana
+            UNDERTONE_NEUTRAL: (128, 161, 209)#Laguna
+        },
+        FEATURE_LIPS: {
+            UNDERTONE_COOL: (92, 96, 193),   #Weekender
+            UNDERTONE_WARM: (79, 79, 160),   #Surf's Up
+            UNDERTONE_NEUTRAL: (85, 76, 178) #Escape
         }
     },
     TONE_DEEP : {
@@ -85,8 +153,22 @@ COLOR_PALETTE = {
             UNDERTONE_COOL: (0, 0, 0),
             UNDERTONE_WARM: (0, 0, 0),
             UNDERTONE_NEUTRAL: (0, 0, 0)
+        },
+        FEATURE_UPPER_CHEEKS: {
+            UNDERTONE_COOL: (99, 104, 149), #Tourmaline
+            UNDERTONE_WARM: (140, 174, 227),#Summer
+            UNDERTONE_NEUTRAL: (52, 75, 113)#Bronzed
+        },
+        FEATURE_CHEEK_BONES: {
+            UNDERTONE_COOL: (67, 116, 178), # Casino
+            UNDERTONE_WARM: (204, 255, 255),#Natura
+            UNDERTONE_NEUTRAL: (39, 66, 46) #Punta Cana
+        },
+        FEATURE_LIPS: {
+            UNDERTONE_COOL: (100, 88, 169),   #Island Life
+            UNDERTONE_WARM: (80, 68, 153),    #Berry Mojito
+            UNDERTONE_NEUTRAL: (118, 100, 176)#Cruisin'
         }
     }
 }
 
-# SKINTONES[TONE_FAIR][FEATURE_CHEEKS][UNDERTONE_COOL]
