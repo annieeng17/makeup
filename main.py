@@ -26,7 +26,7 @@ def detect(img, cascade):
     rects[:,2:] += rects[:,:2]
     return rects
 
-def draw_rects(img, rects, color):
+def draw_rects(img, rects, color,thickness = 2):
     '''
     Draws the rectangles defined by rects on img
     param img: image to draw rectangles on
@@ -35,7 +35,7 @@ def draw_rects(img, rects, color):
     '''
     for x1, y1, x2, y2 in rects:
         # Drawing your face
-        cv.rectangle(img, (x1, y1), (x2, y2), color, 2)
+        cv.rectangle(img, (x1, y1), (x2, y2), color, thickness)
 
 def draw_ellipses(img, ellipses, color,thickness):
     '''
@@ -47,10 +47,12 @@ def draw_ellipses(img, ellipses, color,thickness):
     for center_x1, center_y1, axes_x1, axes_y1 in ellipses:
         # Drawing your face
         cv.ellipse(img,(center_x1,center_y1),(axes_x1,axes_y1), \
-        0,0,360,color,thickness)
+        0,0,360,color,thickness = cv.CV_)
+        # cv.ellipse(...thickness=cv.CV_FILLED)
 # CITATION: used for drawing rects, ellipses and making lines
 # used and altered from https://docs.opencv.org/3.4/dc/da5/tutorial_py_drawing_functions.html
 # cv2.line(img, p1, p2, (255, 0, 0), 3)
+
 def draw_triangle(img,triangle,color,thickness):
     '''
     Creates 3 coordinates defined by rects on img
@@ -62,6 +64,8 @@ def draw_triangle(img,triangle,color,thickness):
         cv2.line(img,(pt_x1, pt_y1),(pt_x2, pt_y2), color,thickness)
         cv2.line(img,(pt_x2, pt_y2),(pt_x3, pt_y3), color,thickness)
         cv2.line(img,(pt_x3, pt_y3),(pt_x1, pt_y1), color,thickness)
+
+# def fill_triangle(img,triangle,color,thickness):
 
 class App:
     # Keep track of what state your program is in
@@ -107,6 +111,9 @@ class App:
         
         self.photo1 = PhotoImage(file = 'Screenshot (89).png')
         self.l11 = Label(self.window, image = self.photo1)
+        self.l12 = Label(self.window, text = f'Your closest match is(Before):{self.vid.face_results}')
+        # recommended_color = COLOR_PALETTE[f'{self.vid.face_results}][FEATURE_CHEEKS][tone[1]]
+        self.l13 = Label(self.window, text = f'Your closest makeup color match is: {')
         # create button
         # CITATION: https://www.python-course.eu/tkinter_buttons.php
 
@@ -226,13 +233,6 @@ class App:
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_FACE_BOX
 
-        # elif self._state == STATE_SKIN_TONE:
-        #     if action == ACTION_BUTTON_NEXT:
-        #         self._state = STATE_EYES
-
-        #     elif action == ACTION_BUTTON_BACK:
-        #         self._state = STATE_FACE_BOX_RESULTS
-
         elif self._state == STATE_EYES:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_EYES_RESULTS
@@ -303,7 +303,7 @@ class App:
         # Default case 
         # Likely something that's wrong
         else:
-            self._state = self.vid.get_frame(self._state)
+            self._state = self.vid.get_frame(self._state,self._tone)
 
         print('Action: {} New State:{}'.format(action, self._state))
         
@@ -361,6 +361,7 @@ class App:
             self._button_cool.grid_remove()
             self._button_neutral.grid_remove()
             self._button_warm.grid_remove()
+            self.l12.grid_remove()
             self.resultlabel1.config(text=self.l1)
             # self.canvas.delete("all")
             rect = self.canvas.create_rectangle(50,25,150,75,fill = 'RosyBrown1')
@@ -379,7 +380,7 @@ class App:
             self.l8.grid(row = 6,column = 1)
             self.l9.grid(row = 7,column = 1)
             self.l10.grid(row = 8, column = 1)
-
+            self.l12.grid_remove()
             self._button_cool.grid(row = 10, column = 0)
             self._button_neutral.grid(row = 10, column = 1)
             self._button_warm.grid(row = 10, column = 2)
@@ -388,8 +389,8 @@ class App:
             # Get a frame from the video source
             # Pass our current state to know which box to draw
         elif self._state == STATE_FACE_BOX_RESULTS:  
-            ret, frame = self.vid.get_frame(self._state)
-            self.l12 = Label(self.window, text = f'Your closest match is :{self.vid.face_results}')
+            ret, frame = self.vid.get_frame(self._state,self._tone)
+            self.l12 = Label(self.window, text = f'Your closest match is(After):{self.vid.face_results}')
             self.l12.grid(row = 0, column = 0)
 
         else:
@@ -404,19 +405,21 @@ class App:
             self.l8.grid_remove()
             self.l9.grid_remove()
             self.l10.grid_remove()
+            self.l12.grid_remove()
             self._button_cool.grid_remove()
             self._button_neutral.grid_remove()
             self._button_warm.grid_remove()
             # Label1 = Label(self.window, text = "State:{}".format(self._state),\
             # width = 40 , font = ("Helvetica",12))
         # try:
-            ret, frame = self.vid.get_frame(self._state)
+            ret, frame = self.vid.get_frame(self._state,self._tone)
 
             if ret:
                 self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
                 self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
 
         self.window.after(self.delay, self.update)
+
 class VideoCapture:
     def __init__(self, video_source=0):
         # Open the video source
@@ -439,7 +442,7 @@ class VideoCapture:
         self.cascade = cv.CascadeClassifier(cv.samples.findFile(cascade_fn))
         self.nested = cv.CascadeClassifier(cv.samples.findFile(nested_fn))
 
-    def get_frame(self,state):
+    def get_frame(self,state,tone):
         if self.vid.isOpened():
             # makes the program handle errors
             try:
@@ -455,6 +458,7 @@ class VideoCapture:
                 gray = cv.equalizeHist(gray)
 
                 # Perform face detection
+                
                 rects = detect(gray, self.cascade)
 
                 # Copy image so we can draw on it
@@ -466,9 +470,11 @@ class VideoCapture:
                 if state == STATE_FACE_BOX:
                     draw_rects(vis, rects, (0, 255, 0))
                 # elif state == STATE_SKIN_TONE:
+
                 elif state == STATE_FACE_BOX_RESULTS:
-                    if self.face_results == None:
-                        self.face_results = find_skintone(vis, rects)
+                    if len(rects) > 0:
+                        if self.face_results == None:
+                            self.face_results = find_skintone(vis, rects)
                 
                 elif state == STATE_BLUSH:  
                     cheek_rects = find_cheeks(rects)   
@@ -476,22 +482,26 @@ class VideoCapture:
 
                 elif state == STATE_BLUSH_RESULTS:
                     cheek_rects = find_cheeks(rects)   
+                    # draw_rects(vis,cheek_rects,(0, 0, 255))
+                    print(self.face_results, FEATURE_CHEEKS, tone)
+                    fillcolor = COLOR_PALETTE[self.face_results][FEATURE_CHEEKS][tone[0]]
+                    draw_rects(vis,cheek_rects,fillcolor,thickness = -1)
                     draw_rects(vis,cheek_rects,(0, 0, 255))
-                    if len(rects) > 0:
-                        cX, cY = get_center_rect(rects[0])
-                        find_avg_color(vis, cX, cY)
+                    recommended_color = COLOR_PALETTE[self.face_results][FEATURE_CHEEKS][tone[1]]
+
                 elif state == STATE_HIGHLIGHTER:
                     upper_cheeks = find_upper_cheeks(rects)
                     draw_triangle(vis,upper_cheeks,(255,255,0),thickness = 1)
+
                 elif state == STATE_HIGHLIGHTER_RESULTS:
                     upper_cheeks = find_upper_cheeks(rects)
                     draw_triangle(vis,upper_cheeks,(255,255,0),thickness = 1)
-                    if len(rects) > 0:
-                        cX, cY = get_center_rect(rects[0])
-                        find_avg_color(vis, cX, cY)
+                    # fill in the shape
+
                 elif state == STATE_CONTOUR:
                     cheek_bones = find_cheek_bones(rects)
                     draw_triangle(vis,cheek_bones,(0,255,255),thickness = 1)
+
                 elif state == STATE_CONTOUR_RESULTS:
                     cheek_bones = find_cheek_bones(rects)
                     draw_triangle(vis,cheek_bones,(0,255,255),thickness = 1)
