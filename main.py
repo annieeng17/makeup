@@ -377,7 +377,7 @@ class App:
             self.l13.grid_remove()
             self.resultlabel1.config(text=self.l1)
             rect = self.canvas.create_rectangle(50,25,150,75,fill = 'RosyBrown1')
-            
+
         elif self._state == STATE_SKIN_TONE:
             self.Heading1.grid_remove()
             self._button_next.grid(row = 4, column = 2)
@@ -406,7 +406,7 @@ class App:
             ret, frame = self.vid.get_frame(self._state,self._tone,self.recommended_color)
             self.l12 = Label(self.window, text = f'Your closest match is(After):{self.vid.face_results}')
             self.l12.grid(row = 0, column = 0)
-            self.l13 = Label(self.window, text = f'Your closest makeup color match is(After):{self.recommended_color}')
+            self.l13 = Label(self.window, text = f'Your closest makeup color match is(After):{self.vid.recommended_color}')
             self.l13.grid(row = 1, column = 0)
 
         else:
