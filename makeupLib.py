@@ -29,18 +29,18 @@ UNDERTONE_COOL    = 'UT_COOL'
 UNDERTONE_WARM    = 'UT_WARM'
 UNDERTONE_NEUTRAL = 'UT_NEUTRAL'
 
-def blush_color()
+# def blush_color()
 # SKINTONES[TONE_FAIR][FEATURE_CHEEKS][UNDERTONE_COOL]
 
 # to fill a color with openCV somehow
 #  cv::Mat edgesIn; 
- cv::Mat edgesNeg =temp.clone();
- //  imshow( "edgesNeg", edgesNeg );
- cv::floodFill(edgesNeg, cv::Point(0,0), CV_RGB(255,255,255));
- imshow( "edgesNeg", edgesNeg );
- bitwise_not(edgesNeg, edgesNeg);
- filledEdgesOut = (edgesNeg | temp);
- imshow("Filled region",filledEdgesOut);
+#  cv::Mat edgesNeg =temp.clone();
+#  //  imshow( "edgesNeg", edgesNeg );
+#  cv::floodFill(edgesNeg, cv::Point(0,0), CV_RGB(255,255,255));
+#  imshow( "edgesNeg", edgesNeg );
+#  bitwise_not(edgesNeg, edgesNeg);
+#  filledEdgesOut = (edgesNeg | temp);
+#  imshow("Filled region",filledEdgesOut);
 '''
 A dictionary that tells the user what shade they are right away after inputting
 their information

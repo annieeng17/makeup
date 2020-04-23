@@ -213,30 +213,32 @@ class App:
         elif self._state == STATE_FACE_BOX:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_FACE_BOX_RESULTS
+                self.l12.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_FACE
 
         elif self._state == STATE_FACE_BOX_RESULTS:
-            if action == ACTION_BUTTON_NEXT:
-                self._state = STATE_SKIN_TONE
-
-            elif action == ACTION_BUTTON_BACK:
-                self._state = STATE_FACE_BOX
-
-        elif self._state == STATE_SKIN_TONE:
+            # create label
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_EYES
 
             elif action == ACTION_BUTTON_BACK:
-                self._state = STATE_FACE_BOX_RESULTS
+                self._state = STATE_FACE_BOX
+
+        # elif self._state == STATE_SKIN_TONE:
+        #     if action == ACTION_BUTTON_NEXT:
+        #         self._state = STATE_EYES
+
+        #     elif action == ACTION_BUTTON_BACK:
+        #         self._state = STATE_FACE_BOX_RESULTS
 
         elif self._state == STATE_EYES:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_EYES_RESULTS
 
             elif action == ACTION_BUTTON_BACK:
-                self._state = STATE_SKIN_TONE
+                self._state = STATE_FACE_BOX_RESULTS
 
         elif self._state == STATE_EYES_RESULTS:  
             if action == ACTION_BUTTON_NEXT:
@@ -385,6 +387,11 @@ class App:
             # Label1 = Label(self.window, text = f'{}')
             # Get a frame from the video source
             # Pass our current state to know which box to draw
+        elif self._state == STATE_FACE_BOX_RESULTS:  
+            ret, frame = self.vid.get_frame(self._state)
+            self.l12 = Label(self.window, text = f'Your closest match is :{self.vid.face_results}')
+            self.l12.grid(row = 0, column = 0)
+
         else:
             self.Heading1.grid(row = 0, column = 0)
             self.l2.grid_remove()
@@ -415,6 +422,7 @@ class VideoCapture:
         # Open the video source
         self.vid = cv2.VideoCapture(video_source)
         print(dir(self.vid))
+        self.face_results = None
 
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
@@ -459,12 +467,13 @@ class VideoCapture:
                     draw_rects(vis, rects, (0, 255, 0))
                 # elif state == STATE_SKIN_TONE:
                 elif state == STATE_FACE_BOX_RESULTS:
-                    self.face_results = find_skintone(vis,x,y) 
-                    
+                    if self.face_results == None:
+                        self.face_results = find_skintone(vis, rects)
+                
                 elif state == STATE_BLUSH:  
                     cheek_rects = find_cheeks(rects)   
                     draw_rects(vis,cheek_rects,(0, 0, 255))
-                    
+
                 elif state == STATE_BLUSH_RESULTS:
                     cheek_rects = find_cheeks(rects)   
                     draw_rects(vis,cheek_rects,(0, 0, 255))

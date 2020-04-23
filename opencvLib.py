@@ -98,6 +98,7 @@ def find_cheek_bones(rects):
 
 # finding the center of an object/given face
 def get_center_rect(rect):
+    rect = rect[0]
     x1, y1, x2, y2 = rect
     return int((x1+x2)/2), int((y1+y2)/2)
 
@@ -137,7 +138,7 @@ def find_avg_color(img, x, y):
     # returns result as a boolean array, detects if you get nan
     # stands for not a number, special point value
     # image can be a nans
-    if np.isnan(averageAfter):
+    if np.isnan(averageAfter).any():
         return average
     else:
         return averageAfter
@@ -149,15 +150,15 @@ def find_distance(gbr,average_color):
     (gbr[2]-average_color[2])**2)**0.5
 
 # function to find the skintone of the face
-
-def find_skintone(img,x,y):
-    center = get_center_rect(img)
-    average_color = find_avg_color(center, x, y)
+# x and y is the point the function wants to find the color of
+def find_skintone(img, rect):
+    center = get_center_rect(rect)
+    average_color = find_avg_color(img, center[0], center[1])
     closest_match = None
     closest_dist = None
     # creates a list of tuples, each tuple representing (skin tone, gbr value)
     all_skintones = [(TONE_FAIR, (211, 231, 255)),(TONE_LIGHT, (185, 224, 255)),\
-    (TONE_MEDIUM, (142, 191, 239)) ,(TONE_TAN ,(120, 174, 237)),(TONE_DEEP , ( 84, 134, 180))]
+    (TONE_MEDIUM, (142, 191, 239)) ,(TONE_TAN ,(120, 174, 237)),(TONE_DEEP , ( 55, 65, 113))]
     # loops through each skin tone and calculates the distance for each one
     for (name, gbr_value) in all_skintones:
         dist = find_distance(gbr_value,average_color)
