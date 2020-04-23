@@ -6,7 +6,6 @@
 # if color is closest to tan then tan, 
 # if color is closest to deep then deep, 
 
-# def Find_SkinTone:
     
 '''
 description for fair skin for highlighter. opt for light colored highlighters.

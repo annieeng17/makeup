@@ -66,6 +66,11 @@ def draw_triangle(img,triangle,color,thickness):
         cv2.line(img,(pt_x3, pt_y3),(pt_x1, pt_y1), color,thickness)
 
 # def fill_triangle(img,triangle,color,thickness):
+#     for pt_x1, pt_y1, pt_x2, pt_y2, pt_x3, pt_y3, in triangle:
+#         cv2.line(img,(pt_x1, pt_y1),(pt_x2, pt_y2), color,thickness)
+#         cv2.line(img,(pt_x2, pt_y2),(pt_x3, pt_y3), color,thickness)
+#         cv2.line(img,(pt_x3, pt_y3),(pt_x1, pt_y1), color,thickness)
+
 
 class App:
     # Keep track of what state your program is in
@@ -79,6 +84,7 @@ class App:
         self.window.bind('<Escape>', lambda e: self.window.quit()) # can't write def in one line, make it as e
         self.video_source = video_source
         self._state = STATE_MENU
+        # self._face_feature = FACE
         self._button_last_clicked = time()
         # open video source (by default this will try to open the computer webcam)
         self.vid = VideoCapture(self.video_source)
@@ -108,12 +114,12 @@ class App:
         self.l10 = Label(self.window, text = 'User must be in bright lighting for application to correctly work',\
         width = 47, anchor = NW, font =("Helvetica", 16), bg = 'RosyBrown1', pady = 2)
         self.resultlabel1 = Label(self.window)
-        
+        # citation img drawing based off of: https://www.pixilart.com/art/pixel-lipstick-e79c1ff7d5a89e5
         self.photo1 = PhotoImage(file = 'Screenshot (89).png')
         self.l11 = Label(self.window, image = self.photo1)
         self.l12 = Label(self.window, text = f'Your closest match is(Before):{self.vid.face_results}')
-        # recommended_color = COLOR_PALETTE[f'{self.vid.face_results}][FEATURE_CHEEKS][tone[1]]
-        self.l13 = Label(self.window, text = f'Your closest makeup color match is: {')
+        self.recommended_color = None
+        self.l13 = Label(self.window, text = f'Your closest makeup color match is(Before):{self.recommended_color}')
         # create button
         # CITATION: https://www.python-course.eu/tkinter_buttons.php
 
@@ -221,9 +227,12 @@ class App:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_FACE_BOX_RESULTS
                 self.l12.grid()
+                self.l13.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_FACE
+                self.l12.grid_remove()
+                self.l13.grid_remove()
 
         elif self._state == STATE_FACE_BOX_RESULTS:
             # create label
@@ -303,7 +312,7 @@ class App:
         # Default case 
         # Likely something that's wrong
         else:
-            self._state = self.vid.get_frame(self._state,self._tone)
+            self._state = self.vid.get_frame(self._state,self._tone,self.recommended_color )
 
         print('Action: {} New State:{}'.format(action, self._state))
         
@@ -333,6 +342,10 @@ class App:
         self._tone = tone
         print('tone',self._tone)
 
+    def recommended_color(self,color):
+        self.recommended_color = color
+        print('color',self.recommended_color)
+
     def callback_mouse(self, event):
         self._state += 1
         print("clicked at", event.x, event.y) 
@@ -353,7 +366,6 @@ class App:
             self._button_start.grid(row = 5, column = 0)
             self.l1.grid(row = 0, column=5)
             self.l11.grid(row = 5, column = 7)
-            # self.video_source.grid_remove()
             self.Heading1.grid_remove()
             self._button_next.grid_remove()
             self._button_back.grid_remove()
@@ -362,9 +374,10 @@ class App:
             self._button_neutral.grid_remove()
             self._button_warm.grid_remove()
             self.l12.grid_remove()
+            self.l13.grid_remove()
             self.resultlabel1.config(text=self.l1)
-            # self.canvas.delete("all")
             rect = self.canvas.create_rectangle(50,25,150,75,fill = 'RosyBrown1')
+            
         elif self._state == STATE_SKIN_TONE:
             self.Heading1.grid_remove()
             self._button_next.grid(row = 4, column = 2)
@@ -381,6 +394,7 @@ class App:
             self.l9.grid(row = 7,column = 1)
             self.l10.grid(row = 8, column = 1)
             self.l12.grid_remove()
+            self.l13.grid_remove()
             self._button_cool.grid(row = 10, column = 0)
             self._button_neutral.grid(row = 10, column = 1)
             self._button_warm.grid(row = 10, column = 2)
@@ -389,9 +403,11 @@ class App:
             # Get a frame from the video source
             # Pass our current state to know which box to draw
         elif self._state == STATE_FACE_BOX_RESULTS:  
-            ret, frame = self.vid.get_frame(self._state,self._tone)
+            ret, frame = self.vid.get_frame(self._state,self._tone,self.recommended_color)
             self.l12 = Label(self.window, text = f'Your closest match is(After):{self.vid.face_results}')
             self.l12.grid(row = 0, column = 0)
+            self.l13 = Label(self.window, text = f'Your closest makeup color match is(After):{self.recommended_color}')
+            self.l13.grid(row = 1, column = 0)
 
         else:
             self.Heading1.grid(row = 0, column = 0)
@@ -406,13 +422,14 @@ class App:
             self.l9.grid_remove()
             self.l10.grid_remove()
             self.l12.grid_remove()
+            self.l13.grid_remove()
             self._button_cool.grid_remove()
             self._button_neutral.grid_remove()
             self._button_warm.grid_remove()
             # Label1 = Label(self.window, text = "State:{}".format(self._state),\
             # width = 40 , font = ("Helvetica",12))
         # try:
-            ret, frame = self.vid.get_frame(self._state,self._tone)
+            ret, frame = self.vid.get_frame(self._state,self._tone,self.recommended_color)
 
             if ret:
                 self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
@@ -421,11 +438,12 @@ class App:
         self.window.after(self.delay, self.update)
 
 class VideoCapture:
-    def __init__(self, video_source=0):
+    def __init__(self, window, video_source=0):
         # Open the video source
         self.vid = cv2.VideoCapture(video_source)
         print(dir(self.vid))
         self.face_results = None
+        self.recommended_color = 'Prosecco Pop'
 
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
@@ -442,7 +460,7 @@ class VideoCapture:
         self.cascade = cv.CascadeClassifier(cv.samples.findFile(cascade_fn))
         self.nested = cv.CascadeClassifier(cv.samples.findFile(nested_fn))
 
-    def get_frame(self,state,tone):
+    def get_frame(self,state,tone,color):
         if self.vid.isOpened():
             # makes the program handle errors
             try:
@@ -481,14 +499,17 @@ class VideoCapture:
                     draw_rects(vis,cheek_rects,(0, 0, 255))
 
                 elif state == STATE_BLUSH_RESULTS:
-                    cheek_rects = find_cheeks(rects)   
-                    # draw_rects(vis,cheek_rects,(0, 0, 255))
+                    
+                    #citation: https://docs.opencv.org/2.4/modules/core/doc/drawing_functions.html
                     print(self.face_results, FEATURE_CHEEKS, tone)
-                    fillcolor = COLOR_PALETTE[self.face_results][FEATURE_CHEEKS][tone[0]]
+                    cheek_rects = find_cheeks(rects)
+                    fillcolor = COLOR_PALETTE[self.face_results][FEATURE_CHEEKS][tone][0]
                     draw_rects(vis,cheek_rects,fillcolor,thickness = -1)
                     draw_rects(vis,cheek_rects,(0, 0, 255))
-                    recommended_color = COLOR_PALETTE[self.face_results][FEATURE_CHEEKS][tone[1]]
-
+                    # if self.recommended_color == None:
+                    self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_CHEEKS][tone][1]
+                    print(self.recommended_color)
+    
                 elif state == STATE_HIGHLIGHTER:
                     upper_cheeks = find_upper_cheeks(rects)
                     draw_triangle(vis,upper_cheeks,(255,255,0),thickness = 1)
@@ -508,15 +529,18 @@ class VideoCapture:
                     if len(rects) > 0:
                         cX, cY = get_center_rect(rects[0])
                         find_avg_color(vis, cX, cY)
+
                 elif state == STATE_LIP:
                     lip_ellipses = find_lips(rects)
                     draw_ellipses(vis, lip_ellipses,(255,0,255),thickness = 1)
+
                 elif state == STATE_LIP_RESULTS:
                     lip_ellipses = find_lips(rects)
-                    draw_ellipses(vis, lip_ellipses,(255,0,255),thickness = 1)
-                    if len(rects) > 0:
-                        cX, cY = get_center_rect(rects[0])
-                        find_avg_color(vis, cX, cY)
+                    fillcolor = COLOR_PALETTE[self.face_results][FEATURE_LIPS][tone[0]]
+                    draw_ellipses(img, ellipses, fillcolor,thickness = -1)
+                    self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_LIPS][tone][1]
+                    print(self.recommended_color)
+
                 elif state == STATE_EYES:
                     # Eye detection
                     if not self.nested.empty():
