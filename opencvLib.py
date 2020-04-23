@@ -48,6 +48,7 @@ def find_lips(rects):
 # algorithm used to reflect shape onto opposite side of face  
 # finding distance between x coordinate and midpoint, then doubling 
 # distance and adding that onto corresponding x coordinate
+# function to find where to apply highlighter
 def find_upper_cheeks(rects):
     upper_cheeks = []
     for x1, y1, x2, y2 in rects:
@@ -71,6 +72,7 @@ def find_upper_cheeks(rects):
         
     return upper_cheeks
 
+# function to find the contours of your face
 def find_cheek_bones(rects):
     cheek_bones = []
     for x1, y1, x2, y2 in rects:
@@ -94,10 +96,12 @@ def find_cheek_bones(rects):
     
     return cheek_bones
 
+# finding the center of an object/given face
 def get_center_rect(rect):
     x1, y1, x2, y2 = rect
     return int((x1+x2)/2), int((y1+y2)/2)
 
+# given a center point of any feature, function will find colors around the point
 def find_avg_color(img, x, y):
     # turns into a numpy list, better than normal lists. can't do in python
     delta = 3
@@ -110,7 +114,7 @@ def find_avg_color(img, x, y):
     colors.append(np.array(img[y+delta, x+delta]))
 
     # Find average, but remove outliers
-    OUTLIER_STD_DEV = 10
+    OUTLIER_STD_DEV = 100  #????
     # computes the weighted average on an axis
     # adapted and used from : https://docs.scipy.org/doc/numpy/reference/generated/numpy.average.html
     average = np.average(colors, axis=0) # tells which axis/dimenstion to operate on
@@ -138,25 +142,32 @@ def find_avg_color(img, x, y):
     else:
         return averageAfter
 
-def closest_value(listOfVectors, vector):
-    close_dist = None
-    close_val = None
-    for rgb in listOfVectors:
-        curr_dist = getDistance(rgb, vector)
-        if curr_dist == None:
-            close_dist = curr_dist
-        elif curr_dist < close_dist:
-            close_dist = curr_dist
-    # calculate which element in listOfVectors that vector is closest to and return that
+# colors in openCV are reversed, they are GBR
+# function used to find the distance between GBR colors
+def find_distance(gbr,average_color):
+    return ((gbr[0]-average_color[0])**2 + (gbr[1]-average_color[1])**2 +
+    (gbr[2]-average_color[2])**2)**0.5
 
-def getDistance(v1, v2):
-    sum = 0
-    for i in range(len(v1)):
-        sum += (v1[i] - v2[i])**2
-    return math.sqrt(sum)
+# function to find the skintone of the face
 
-TONE_FAIR   = (211, 231, 255) 
-TONE_LIGHT  = (185, 224, 255)
-TONE_MEDIUM = (142, 191, 239)
-TONE_TAN    = (120, 174, 237)
-TONE_DEEP   = ( 84, 134, 180)
+def find_skintone(img,x,y):
+    center = get_center_rect(img)
+    average_color = find_avg_color(center, x, y)
+    closest_match = None
+    closest_dist = None
+    # creates a list of tuples, each tuple representing (skin tone, gbr value)
+    all_skintones = [(TONE_FAIR, (211, 231, 255)),(TONE_LIGHT, (185, 224, 255)),\
+    (TONE_MEDIUM, (142, 191, 239)) ,(TONE_TAN ,(120, 174, 237)),(TONE_DEEP , ( 84, 134, 180))]
+    # loops through each skin tone and calculates the distance for each one
+    for (name, gbr_value) in all_skintones:
+        dist = find_distance(gbr_value,average_color)
+        if closest_dist == None or closest_dist > dist:
+            closest_dist = dist
+            closest_match = name #returns the name with the closest distance
+    return closest_match
+
+
+
+
+
+

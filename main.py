@@ -104,6 +104,9 @@ class App:
         self.l10 = Label(self.window, text = 'User must be in bright lighting for application to correctly work',\
         width = 47, anchor = NW, font =("Helvetica", 16), bg = 'RosyBrown1', pady = 2)
         self.resultlabel1 = Label(self.window)
+        
+        self.photo1 = PhotoImage(file = 'Screenshot (89).png')
+        self.l11 = Label(self.window, image = self.photo1)
         # create button
         # CITATION: https://www.python-course.eu/tkinter_buttons.php
 
@@ -174,7 +177,7 @@ class App:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_SKIN_TONE
                 # self._button['text'] = 'Next'
-
+                self.l11.grid_remove()
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_MENU
             
@@ -197,6 +200,7 @@ class App:
                 self.l8.grid_remove()
                 self.l9.grid_remove()
                 self.l10.grid_remove()
+                self.l11.grid_remove()
 
         elif self._state == STATE_FACE:
             if action == ACTION_BUTTON_NEXT:
@@ -300,7 +304,8 @@ class App:
             self._state = self.vid.get_frame(self._state)
 
         print('Action: {} New State:{}'.format(action, self._state))
-
+        
+    # button time created so the user can't spam the button
     def button_func(self): 
         '''
         Invoked when the start/next button is clicked
@@ -325,6 +330,7 @@ class App:
     def button_func_tone(self,tone):
         self._tone = tone
         print('tone',self._tone)
+
     def callback_mouse(self, event):
         self._state += 1
         print("clicked at", event.x, event.y) 
@@ -343,7 +349,8 @@ class App:
         global resultlabel1
         if self._state == STATE_MENU:
             self._button_start.grid(row = 5, column = 0)
-            self.l1.grid(row=0, column=5)
+            self.l1.grid(row = 0, column=5)
+            self.l11.grid(row = 5, column = 7)
             # self.video_source.grid_remove()
             self.Heading1.grid_remove()
             self._button_next.grid_remove()
@@ -370,6 +377,7 @@ class App:
             self.l8.grid(row = 6,column = 1)
             self.l9.grid(row = 7,column = 1)
             self.l10.grid(row = 8, column = 1)
+
             self._button_cool.grid(row = 10, column = 0)
             self._button_neutral.grid(row = 10, column = 1)
             self._button_warm.grid(row = 10, column = 2)
@@ -394,16 +402,14 @@ class App:
             self._button_warm.grid_remove()
             # Label1 = Label(self.window, text = "State:{}".format(self._state),\
             # width = 40 , font = ("Helvetica",12))
-            try:
-                ret, frame = self.vid.get_frame(self._state)
+        # try:
+            ret, frame = self.vid.get_frame(self._state)
 
-                if ret:
-                    self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
-                    self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
-                else:
-                    print("Error : Camera in use")
-                    self.window.after(self.delay, self.update)
+            if ret:
+                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
+                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
 
+        self.window.after(self.delay, self.update)
 class VideoCapture:
     def __init__(self, video_source=0):
         # Open the video source
@@ -427,9 +433,10 @@ class VideoCapture:
 
     def get_frame(self,state):
         if self.vid.isOpened():
+            # makes the program handle errors
             try:
                 ret, img = self.vid.read() #abbreviation for return
-            else:
+            except:
                 print("camera cannot be run")
             # if return is not 0
             # If the camera has successfully picked up an image
@@ -450,14 +457,14 @@ class VideoCapture:
                     
                 if state == STATE_FACE_BOX:
                     draw_rects(vis, rects, (0, 255, 0))
-                elif state == STATE_SKIN_TONE:
-                    draw_rects(vis, rects, (0, 255, 0))
-                    if len(rects) > 0:
-                        cX, cY = get_center_rect(rects[0])
-                        find_avg_color(vis, cX, cY)
+                # elif state == STATE_SKIN_TONE:
+                elif state == STATE_FACE_BOX_RESULTS:
+                    self.face_results = find_skintone(vis,x,y) 
+                    
                 elif state == STATE_BLUSH:  
                     cheek_rects = find_cheeks(rects)   
                     draw_rects(vis,cheek_rects,(0, 0, 255))
+                    
                 elif state == STATE_BLUSH_RESULTS:
                     cheek_rects = find_cheeks(rects)   
                     draw_rects(vis,cheek_rects,(0, 0, 255))

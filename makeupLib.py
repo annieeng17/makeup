@@ -13,11 +13,11 @@ description for fair skin for highlighter. opt for light colored highlighters.
 should opt for highlighters with a pearlescent, icy silver or champagne sheen.
  adds just enough radiance to your complexion.
 '''
-TONE_FAIR   = (211, 231, 255) 
-TONE_LIGHT  = (185, 224, 255)
-TONE_MEDIUM = (142, 191, 239)
-TONE_TAN    = (120, 174, 237)
-TONE_DEEP   = ( 84, 134, 180)
+TONE_FAIR   = 'Fair'
+TONE_LIGHT  = 'Light'
+TONE_MEDIUM = 'Medium'
+TONE_TAN    = 'Tan'
+TONE_DEEP   = 'Deep'
 
 FEATURE_CHEEKS = 'CHEEKS'
 FEATURE_EYES   = 'EYES'
@@ -29,7 +29,18 @@ UNDERTONE_COOL    = 'UT_COOL'
 UNDERTONE_WARM    = 'UT_WARM'
 UNDERTONE_NEUTRAL = 'UT_NEUTRAL'
 
+def blush_color()
 # SKINTONES[TONE_FAIR][FEATURE_CHEEKS][UNDERTONE_COOL]
+
+# to fill a color with openCV somehow
+#  cv::Mat edgesIn; 
+ cv::Mat edgesNeg =temp.clone();
+ //  imshow( "edgesNeg", edgesNeg );
+ cv::floodFill(edgesNeg, cv::Point(0,0), CV_RGB(255,255,255));
+ imshow( "edgesNeg", edgesNeg );
+ bitwise_not(edgesNeg, edgesNeg);
+ filledEdgesOut = (edgesNeg | temp);
+ imshow("Filled region",filledEdgesOut);
 '''
 A dictionary that tells the user what shade they are right away after inputting
 their information
