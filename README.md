@@ -7,12 +7,14 @@ eye shadow and blush.
 ## TODOs
 
 - Everytime you click the next button, it detects a different feature of your 
-face and generates/recommends a color
+face and generates/recommends a color. Theres a timer of 1 second on each next 
+and back button clicked, so the program won't crash if the user tries to spam a
+button. 
 
-- Has to switch between openCV and tkinter somehow...
+- Has to switch between openCV and tkinter somehow... Done
 
-- Use tkinter to make an intro page/ other pages displaying the facial features
-- highlighter and contour make it in triangles
+- Use tkinter to make an intro page/ other pages displaying the facial features. Done
+- highlighter and contour make it in triangles. Done
 
 - find average color within the center (4 points) of the rectangle and ellipse
 
@@ -28,6 +30,8 @@ one
 whether they're cool, warm or neutral tones based on a series of questions
 
 ## Color Palette
+- All RGB colors hard coded in, most color and color name references are based 
+from the Sephora website
 
 - extract average skin tone color within a shape and generate what color suits 
 best for that certain facial feature
@@ -37,7 +41,7 @@ best for that certain facial feature
 - highlighter: upper cheek, contour: cheek color, a little bit darker
 
 - should make a gradient/transparency color scale for each facial feature for 
-better user experience and style
+better user experience and style. Extra after MVP
 
 ## Bugs to fix 
 
