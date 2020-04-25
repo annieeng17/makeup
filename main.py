@@ -179,10 +179,8 @@ class App:
     def update_fsm(self, action):
         '''
         State machine to decide the action of the program.
-
         Takes in an action and looks at the current state to determine
         what next state to go to and what actions to take
-
         :param action: The action that occurred
         '''
 
@@ -226,8 +224,8 @@ class App:
         elif self._state == STATE_FACE_BOX:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_FACE_BOX_RESULTS
-                self.l12.grid()
-                self.l13.grid()
+                # self.l12.grid()
+                # self.l13.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_FACE
@@ -259,6 +257,7 @@ class App:
         elif self._state == STATE_BLUSH:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_BLUSH_RESULTS
+                # self.l13.grid(row = 1, column = 0)
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_EYES_RESULTS
@@ -312,7 +311,7 @@ class App:
         # Default case 
         # Likely something that's wrong
         else:
-            self._state = self.vid.get_frame(self._state,self._tone,self.recommended_color )
+            self._state = self.vid.get_frame(self._state,self._tone)
 
         print('Action: {} New State:{}'.format(action, self._state))
         
@@ -403,12 +402,23 @@ class App:
             # Get a frame from the video source
             # Pass our current state to know which box to draw
         elif self._state == STATE_FACE_BOX_RESULTS:  
-            ret, frame = self.vid.get_frame(self._state,self._tone,self.recommended_color)
-            self.l12 = Label(self.window, text = f'Your closest match is(After):{self.vid.face_results}')
+            ret, frame = self.vid.get_frame(self._state,self._tone)
+            self.l12 = Label(self.window, text = f'Your closest match is:{self.vid.face_results}')
             self.l12.grid(row = 0, column = 0)
-            self.l13 = Label(self.window, text = f'Your closest makeup color match is(After):{self.vid.recommended_color}')
-            self.l13.grid(row = 1, column = 0)
 
+        
+            # self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.vid.recommended_color}')
+            # self.l13.grid(row = 1, column = 0)
+
+        elif self._state == STATE_BLUSH_RESULTS:
+            
+            ret, frame = self.vid.get_frame(self._state,self._tone)
+            if ret:
+                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
+                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
+            print('ret',ret)
+            self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.vid.recommended_color}')
+            self.l13.grid(row = 1, column = 0)
         else:
             self.Heading1.grid(row = 0, column = 0)
             self.l2.grid_remove()
@@ -429,7 +439,7 @@ class App:
             # Label1 = Label(self.window, text = "State:{}".format(self._state),\
             # width = 40 , font = ("Helvetica",12))
         # try:
-            ret, frame = self.vid.get_frame(self._state,self._tone,self.recommended_color)
+            ret, frame = self.vid.get_frame(self._state,self._tone)
 
             if ret:
                 self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
@@ -443,7 +453,7 @@ class VideoCapture:
         self.vid = cv2.VideoCapture(video_source)
         print(dir(self.vid))
         self.face_results = None
-        self.recommended_color = 'Prosecco Pop'
+        self.recommended_color = None
 
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
@@ -460,7 +470,7 @@ class VideoCapture:
         self.cascade = cv.CascadeClassifier(cv.samples.findFile(cascade_fn))
         self.nested = cv.CascadeClassifier(cv.samples.findFile(nested_fn))
 
-    def get_frame(self,state,tone,color):
+    def get_frame(self,state,tone):
         if self.vid.isOpened():
             # makes the program handle errors
             try:
