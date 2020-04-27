@@ -47,13 +47,12 @@ def draw_ellipses(img, ellipses, color,thickness):
     for center_x1, center_y1, axes_x1, axes_y1 in ellipses:
         # Drawing your face
         cv.ellipse(img,(center_x1,center_y1),(axes_x1,axes_y1), \
-        0,0,360,color,thickness = cv.CV_)
-        # cv.ellipse(...thickness=cv.CV_FILLED)
+        0,0,360,color,thickness)
 # CITATION: used for drawing rects, ellipses and making lines
 # used and altered from https://docs.opencv.org/3.4/dc/da5/tutorial_py_drawing_functions.html
 # cv2.line(img, p1, p2, (255, 0, 0), 3)
 
-def draw_triangle(img,triangle,color,thickness):
+def draw_triangle(img,triangle,color,thickness = 2):
     '''
     Creates 3 coordinates defined by rects on img
     param img: image to draw rectangles on
@@ -65,12 +64,12 @@ def draw_triangle(img,triangle,color,thickness):
         cv2.line(img,(pt_x2, pt_y2),(pt_x3, pt_y3), color,thickness)
         cv2.line(img,(pt_x3, pt_y3),(pt_x1, pt_y1), color,thickness)
 
-# def fill_triangle(img,triangle,color,thickness):
-#     for pt_x1, pt_y1, pt_x2, pt_y2, pt_x3, pt_y3, in triangle:
-#         cv2.line(img,(pt_x1, pt_y1),(pt_x2, pt_y2), color,thickness)
-#         cv2.line(img,(pt_x2, pt_y2),(pt_x3, pt_y3), color,thickness)
-#         cv2.line(img,(pt_x3, pt_y3),(pt_x1, pt_y1), color,thickness)
-
+def fill_triangle(img,triangle,color,thickness = 1):
+    for pt_x1, pt_y1, pt_x2, pt_y2, pt_x3, pt_y3, in triangle:
+        points = np.array([[pt_x1, pt_y1],[pt_x2, pt_y2],[pt_x3, pt_y3]], dtype=np.int32)
+        print(color)
+        print(points)
+        cv2.fillConvexPoly(img, points, color)
 
 class App:
     # Keep track of what state your program is in
@@ -419,6 +418,31 @@ class App:
             print('ret',ret)
             self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.vid.recommended_color}')
             self.l13.grid(row = 1, column = 0)
+        
+        elif self._state == STATE_HIGHLIGHTER_RESULTS:
+            ret, frame = self.vid.get_frame(self._state,self._tone)
+            if ret:
+                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
+                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
+            self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.vid.recommended_color}')
+            self.l13.grid(row = 1, column = 0)
+
+        elif self._state == STATE_CONTOUR_RESULTS:
+            ret, frame = self.vid.get_frame(self._state,self._tone)
+            if ret:
+                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
+                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
+            self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.vid.recommended_color}')
+            self.l13.grid(row = 1, column = 0)
+
+        elif self._state == STATE_LIP_RESULTS:
+            ret, frame = self.vid.get_frame(self._state,self._tone)
+            if ret:
+                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
+                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
+            self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.vid.recommended_color}')
+            self.l13.grid(row = 1, column = 0)
+
         else:
             self.Heading1.grid(row = 0, column = 0)
             self.l2.grid_remove()
@@ -490,7 +514,13 @@ class VideoCapture:
                 rects = detect(gray, self.cascade)
 
                 # Copy image so we can draw on it
+                # img = original git
                 vis = img.copy()
+                # Flip image so that the feed is mirrored to the user
+                vis = cv2.flip(vis, 1)
+
+                # Return a boolean success flag and the current frame converted to BGR
+                return (ret, cv2.cvtColor(vis, cv2.COLOR_BGR2RGB))
 
                 # Facial Feature detection
                 # color formatting is (blue ,green, red)
@@ -526,7 +556,10 @@ class VideoCapture:
 
                 elif state == STATE_HIGHLIGHTER_RESULTS:
                     upper_cheeks = find_upper_cheeks(rects)
-                    draw_triangle(vis,upper_cheeks,(255,255,0),thickness = 1)
+                    fillcolor = COLOR_PALETTE[self.face_results][FEATURE_UPPER_CHEEKS][tone][0]
+                    fill_triangle(vis,upper_cheeks,fillcolor,thickness = -1)
+                    # draw_triangle(vis,upper_cheeks,(255,255,0))
+                    self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_UPPER_CHEEKS][tone][1]
                     # fill in the shape
 
                 elif state == STATE_CONTOUR:
@@ -535,10 +568,11 @@ class VideoCapture:
 
                 elif state == STATE_CONTOUR_RESULTS:
                     cheek_bones = find_cheek_bones(rects)
-                    draw_triangle(vis,cheek_bones,(0,255,255),thickness = 1)
-                    if len(rects) > 0:
-                        cX, cY = get_center_rect(rects[0])
-                        find_avg_color(vis, cX, cY)
+                    fillcolor = COLOR_PALETTE[self.face_results][FEATURE_CHEEK_BONES][tone][0]
+                    fill_triangle(vis,cheek_bones,fillcolor,thickness = -1)
+                    # draw_triangle(vis,cheek_bones,(0,255,255),thickness = 1)
+                    self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_CHEEK_BONES][tone][1]
+                    
 
                 elif state == STATE_LIP:
                     lip_ellipses = find_lips(rects)
@@ -546,8 +580,8 @@ class VideoCapture:
 
                 elif state == STATE_LIP_RESULTS:
                     lip_ellipses = find_lips(rects)
-                    fillcolor = COLOR_PALETTE[self.face_results][FEATURE_LIPS][tone[0]]
-                    draw_ellipses(img, ellipses, fillcolor,thickness = -1)
+                    fillcolor = COLOR_PALETTE[self.face_results][FEATURE_LIPS][tone][0]
+                    draw_ellipses(vis, lip_ellipses, fillcolor,thickness = -1)
                     self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_LIPS][tone][1]
                     print(self.recommended_color)
 
