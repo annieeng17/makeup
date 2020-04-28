@@ -70,7 +70,7 @@ def fill_hexagon(img,hexs,color,thickness = 1):
     '''
     for pt_x1, pt_y1, pt_x2, pt_y2, pt_x3, pt_y3  in hexs:
         delta = 5
-        points = np.array([[pt_x1, pt_y1],[pt_x2, pt_y2],[pt_x3, pt_y3],[pt_x3, pt_y3 + delta] \
+        points = np.array([[pt_x1, pt_y1],[pt_x2, pt_y2],[pt_x3, pt_y3],[pt_x3, pt_y3 + delta], \
             [pt_x2, pt_y2 + delta],[pt_x1, pt_y1 + delta]], dtype = np.int32)
             # np.int32 is an array type and specific conversion to an integer
         print(color)
