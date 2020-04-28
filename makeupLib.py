@@ -1,12 +1,3 @@
-# draw_rects(vis, rects, (0, 255, 0))
-# call on average color function and find the color, 
-# if color is closest to fair then fair, 
-# if color is closest to lighthen light, 
-# if color is closest to medium then medium, 
-# if color is closest to tan then tan, 
-# if color is closest to deep then deep, 
-
-    
 '''
 description for fair skin for highlighter. opt for light colored highlighters.
 should opt for highlighters with a pearlescent, icy silver or champagne sheen.
@@ -40,9 +31,9 @@ COLOR_PALETTE = {
             UNDERTONE_NEUTRAL: ((169, 172, 247), 'Peachy Pink')
         },
         FEATURE_EYES: {
-            UNDERTONE_COOL: ((0, 0, 0), 'Null'),
-            UNDERTONE_WARM: ((0, 0, 0), 'Null'),
-            UNDERTONE_NEUTRAL: ((0, 0, 0), 'Null')
+            UNDERTONE_COOL: ((154, 157, 209), 'Fairy'),
+            UNDERTONE_WARM: ((147, 172, 243), 'Glistening'),
+            UNDERTONE_NEUTRAL: ((111, 130, 192), 'Tempera')
         },
         FEATURE_UPPER_CHEEKS: {
             UNDERTONE_COOL: ((0, 0, 0),        'Pearl'),
@@ -67,9 +58,9 @@ COLOR_PALETTE = {
             UNDERTONE_NEUTRAL: ((148, 155, 218), 'Sheer Plum')
         },
         FEATURE_EYES: {
-            UNDERTONE_COOL: ((0, 0, 0), 'Null'),
-            UNDERTONE_WARM: ((0, 0, 0), 'Null'),
-            UNDERTONE_NEUTRAL: ((0, 0, 0), 'Null')
+            UNDERTONE_COOL: ((154, 156, 221), 'Bronze'),
+            UNDERTONE_WARM: ((84, 103, 171), 'Orange Soda'),
+            UNDERTONE_NEUTRAL: ((130, 160, 233), 'Noir')
         },
         FEATURE_UPPER_CHEEKS: {
             UNDERTONE_COOL: ((216, 220, 245),  'Vanilla Quartz'),
@@ -94,9 +85,9 @@ COLOR_PALETTE = {
             UNDERTONE_NEUTRAL: ((96, 88, 195),'Soft Berry')
         },
         FEATURE_EYES: {
-            UNDERTONE_COOL: ((0, 0, 0), 'Null'),
-            UNDERTONE_WARM: ((0, 0, 0), 'Null'),
-            UNDERTONE_NEUTRAL: ((0, 0, 0), 'Null')
+            UNDERTONE_COOL: ((113, 113, 174), 'Dandelion'),
+            UNDERTONE_WARM: ((128, 124, 196), 'Dusty Rose'),
+            UNDERTONE_NEUTRAL: ((53, 57, 96), 'Rose Pink')
         },
         FEATURE_UPPER_CHEEKS: {
             UNDERTONE_COOL: ((191, 214, 255),  'Moonstone'),
@@ -121,9 +112,9 @@ COLOR_PALETTE = {
             UNDERTONE_NEUTRAL: ((116, 151, 225), 'Bronze')
         },
         FEATURE_EYES: {
-            UNDERTONE_COOL: ((0, 0, 0), 'Null'),
-            UNDERTONE_WARM: ((0, 0, 0), 'Null'),
-            UNDERTONE_NEUTRAL: ((0, 0, 0), 'Null')
+            UNDERTONE_COOL: ((90, 106, 198), 'Sultry'),
+            UNDERTONE_WARM: ((107, 127, 211), 'Sienna'),
+            UNDERTONE_NEUTRAL: ((112, 102, 178), 'Burnt Orange')
         },
         FEATURE_UPPER_CHEEKS: {
             UNDERTONE_COOL: ((188, 206, 229),  'Shimmer'),
@@ -148,9 +139,9 @@ COLOR_PALETTE = {
             UNDERTONE_NEUTRAL: ((62, 66, 154), 'Rich Cinnamon')
         },
         FEATURE_EYES: {
-            UNDERTONE_COOL: ((0, 0, 0), 'Null'),
-            UNDERTONE_WARM: ((0, 0, 0), 'Null'),
-            UNDERTONE_NEUTRAL: ((0, 0, 0), 'Null')
+            UNDERTONE_COOL: ((116, 130, 191), 'Rustic'),
+            UNDERTONE_WARM: ((81, 105, 200), 'Cyprus Umber'),
+            UNDERTONE_NEUTRAL: ((121, 128, 169), 'Mulberry')
         },
         FEATURE_UPPER_CHEEKS: {
             UNDERTONE_COOL: ((99, 104, 149), 'Tourmaline'),
