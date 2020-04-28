@@ -1,8 +1,8 @@
 # makeup
 
-This program will detect your facial features and formulate what pigments best
-suit your skin tone and eye color. You can also choose from different lip colors, 
-eye shadow and blush.
+- This program called Application of Beauty will detect your facial features and 
+formulate what pigments best suit your skin tone and eye color. You can also 
+choose from different blush, contour, eye shadow, highlighter and lipstick.
 
 ## TODOs
 
@@ -49,3 +49,9 @@ better user experience and style. Extra after MVP
 freezes, fix it somehow. FIXED
 
 - also remove the logo when it goes to the face menu and so on. FIXED
+
+- need to create a slider because that is very important for complexity and 
+points
+
+- need to also fix the fill eyeshadow function, for some reason it doesn't work
+even though I tried to follow the way I did it for fill_in_triangle
