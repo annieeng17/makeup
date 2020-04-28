@@ -22,11 +22,6 @@ ACTION_BUTTON_BACK  = 2
 # Button time in seconds
 BUTTON_TIME_REQUIRED = 0.5
 
-FACE = 1
-CHEEKS = 2
-UPPER_CHEEKS = 3
-CHEEK_BONES = 4
-
 # Skintone identifiers
 SKINTONE_COOL = 'UT_COOL'
 SKINTONE_WARM = 'UT_WARM'
