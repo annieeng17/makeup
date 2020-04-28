@@ -70,7 +70,7 @@ def fill_hexagon(img,hexs,color,thickness = 1):
     '''
     for pt_x1, pt_y1, pt_x2, pt_y2, pt_x3, pt_y3  in hexs:
         delta = 5
-        points = np.array([[pt_x1, pt_y1],[pt_x2, pt_y2],[pt_x3, pt_y3],[pt_x3, pt_y3 + delta] \
+        points = np.array([[pt_x1, pt_y1],[pt_x2, pt_y2],[pt_x3, pt_y3],[pt_x3, pt_y3 + delta], \
             [pt_x2, pt_y2 + delta],[pt_x1, pt_y1 + delta]], dtype = np.int32)
             # np.int32 is an array type and specific conversion to an integer
         print(color)
@@ -125,7 +125,8 @@ class App:
 
     def __init__(self, window, window_title, video_source = 0): # many video sources, which camera are we using
         self.window = window
-        self.window.minsize(500,500) 
+        self.window.minsize(800,600) 
+        self.window.maxsize(800,700)
         self.window.title(window_title)
         self.window.bind('<Escape>', lambda e: self.window.quit()) # can't write def in one line, make it as e
         self.video_source = video_source
@@ -143,13 +144,16 @@ class App:
         self.photo1 = self.photo1.resize((800, 600),Image.ANTIALIAS)
         self.photo1 = ImageTk.PhotoImage(self.photo1)
         self.photo2 = Image.open('Questionnaire.png')
-        self.photo2 = self.photo2.resize((800,500),Image.ANTIALIAS)
+        self.photo2 = self.photo2.resize((800, 600),Image.ANTIALIAS)
         self.photo2 = ImageTk.PhotoImage(self.photo2)
         self.l11 = Label(self.window, image = self.photo1)
         self.l12 = Label(self.window, text = f'Your closest match is:{self.vid.face_results}')
         self.recommended_color = None
         self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.recommended_color}')
         self.l14 = Label(self.window, image = self.photo2)
+        self.color_slider = Scale(self.window, from_=0, to = 100, orient= HORIZONTAL)
+        self.l11.grid(row = 0, column = 0)
+        
         # create button
         # CITATION: https://www.python-course.eu/tkinter_buttons.php
 
@@ -189,7 +193,8 @@ class App:
                 text = 'Neutral', 
                 fg = "black",
                 bg ='lavender',
-                command = lambda: self.button_func_tone(SKINTONE_NEUTRAL))       
+                command = lambda: self.button_func_tone(SKINTONE_NEUTRAL))
+        self._button_start.grid(row = 5, column = 0)       
         
         # Create a canvas that can fit the above video source size
         # CITATION: https://solarianprogrammer.com/2018/04/21/python-opencv-show-video-tkinter-window/
@@ -198,7 +203,7 @@ class App:
 
         # Respond to clicks
         self.canvas.bind("<Button-1>", self.callback_mouse)
-
+        rect = self.canvas.create_rectangle(50,25,150,75,fill = 'RosyBrown1')
         # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
         self.update()
@@ -219,11 +224,22 @@ class App:
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_MENU
+                self.Heading1.grid_remove()
+                self._button_next.grid_remove()
+                self._button_back.grid_remove()
+                self._button_back.grid_remove()
+                self._button_cool.grid_remove()
+                self._button_neutral.grid_remove()
+                self._button_warm.grid_remove()
+                
+                self.l12.grid_remove()
+                self.l13.grid_remove()
+                self.l14.grid_remove()
             
         elif self._state == STATE_SKIN_TONE:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_FACE
-                self.canvas.grid()
+                self.canvas.grid(row = 1, column = 1)
                 self.l14.grid_remove()
 
             elif action == ACTION_BUTTON_BACK:
@@ -231,6 +247,16 @@ class App:
                 self._button_start.grid_forget()
                 self.Heading1.grid_remove()
                 self.l11.grid()
+                self.Heading1.grid_remove()
+                self._button_next.grid_remove()
+                self._button_back.grid_remove()
+                self._button_back.grid_remove()
+                self._button_cool.grid_remove()
+                self._button_neutral.grid_remove()
+                self._button_warm.grid_remove()
+                self.l12.grid_remove()
+                self.l13.grid_remove()
+                self.l14.grid_remove()
 
         elif self._state == STATE_FACE:
             if action == ACTION_BUTTON_NEXT:
@@ -260,6 +286,7 @@ class App:
         elif self._state == STATE_EYES:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_EYES_RESULTS
+                self.color_slider.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_FACE_BOX_RESULTS
@@ -274,20 +301,25 @@ class App:
         elif self._state == STATE_BLUSH:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_BLUSH_RESULTS
+                self.color_slider.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_EYES_RESULTS
+                self.color_slider.grid_remove()
 
         elif self._state == STATE_BLUSH_RESULTS:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_HIGHLIGHTER
+                self.color_slider.grid_remove()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_BLUSH
+                self.color_slider.grid_remove()
 
         elif self._state == STATE_HIGHLIGHTER:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_HIGHLIGHTER_RESULTS
+                self.color_slider.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_BLUSH_RESULTS
@@ -302,6 +334,7 @@ class App:
         elif self._state == STATE_CONTOUR:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_CONTOUR_RESULTS
+                self.color_slider.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_HIGHLIGHTER_RESULTS
@@ -315,7 +348,8 @@ class App:
 
         elif self._state == STATE_LIP:
             if action == ACTION_BUTTON_NEXT:
-                self._state = STATE_LIP_RESULTS 
+                self._state = STATE_LIP_RESULTS
+                self.color_slider.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_CONTOUR_RESULTS
@@ -376,22 +410,7 @@ class App:
         Called every self.delay milliseconds
         '''
         global resultlabel1
-        if self._state == STATE_MENU:
-            self._button_start.grid(row = 5, column = 0)
-            self.l11.grid(row = 0, column = 0)
-            self.Heading1.grid_remove()
-            self._button_next.grid_remove()
-            self._button_back.grid_remove()
-            self._button_back.grid_remove()
-            self._button_cool.grid_remove()
-            self._button_neutral.grid_remove()
-            self._button_warm.grid_remove()
-            self.l12.grid_remove()
-            self.l13.grid_remove()
-            self.l14.grid_remove()
-            rect = self.canvas.create_rectangle(50,25,150,75,fill = 'RosyBrown1')
-
-        elif self._state == STATE_SKIN_TONE:
+        if self._state == STATE_SKIN_TONE:
             self.Heading1.grid_remove()
             self.l14.grid(row = 1, column = 1)
             self._button_next.grid(row = 1, column = 2)
