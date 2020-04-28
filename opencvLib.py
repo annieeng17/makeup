@@ -2,6 +2,36 @@ import cv2 as cv
 import numpy as np
 import math
 from makeupLib import *
+
+def find_eye(rects):
+    eye_rects = [ ]
+
+    for x1, y1, x2, y2 in rects:
+        delta_1 = 15
+        delta_2 = -45
+        eye_x1 = int(0.3*x1) + int(0.7*x2) + delta_1
+        eye_y1 = int(0.4*y1) + int(0.6*y2) + delta_2
+        eye_x2 = int(0.4*x1) + int(0.6*x2) + delta_1
+        eye_y2 = int(0.45*y1) + int(0.55*y2) + delta_2
+        eye_x3 = int(0.5*x1) + int(0.5*x2) + delta_1
+        eye_y3 = int(0.4*y1) + int(0.6*y2) + delta_2
+        # eye_x4 = eye_x1 + delta
+        # eye_y4 = eye_y1 + delta
+        # eye_x5 = eye_x2 + delta
+        # eye_y5 = eye_y2 + delta
+        # eye_x6 = eye_x3 + delta
+        # eye_y6 = eye_y3 + delta
+        midpoint = int((x1 + x2)/2)
+        distance_1 = midpoint - eye_x1
+        distance_2 = midpoint - eye_x2
+        distance_3 = midpoint - eye_x3
+        reflect_x1 = 2*(distance_1) + (eye_x1)
+        reflect_x2 = 2*(distance_2) + (eye_x2)
+        reflect_x3 = 2*(distance_3) + (eye_x3)
+        eye_rects.append((eye_x1,eye_y1,eye_x2,eye_y2,eye_x3,eye_y3))
+        eye_rects.append((reflect_x1,eye_y1,reflect_x2,eye_y2,reflect_x3,eye_y3))
+    return eye_rects
+
 def find_cheeks (rects):
     '''
     Converts the rectangles in rects to cheek rectangles
