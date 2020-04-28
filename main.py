@@ -39,14 +39,43 @@ def draw_rects(img, rects, color,thickness = 2):
         # Drawing your face
         cv.rectangle(img, (x1, y1), (x2, y2), color, thickness)
 
-def draw_hexagon(img, hexs, color, thickness=1):
-    for x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6 in hexs:
+def draw_hexagon(img, hexs, color, thickness = 1):
+    '''
+    Connects the points defined by hexs on img
+    param img: image to draw rectangles on
+    param rects: list of rectangles to draw, format [(x1, y1, x2, y2), ...]
+    param color: color to draw the rectangles, (R, G, B) coordinate.
+    '''
+    for pt_x1, pt_y1, pt_x2, pt_y2, pt_x3, pt_y3  in hexs:
+        delta = 5
+        # pt_x1 = pt_x4
+        # pt_x2 = pt_x5
+        # pt_x3 = pt_x6
+        # pt_y4 = pt_y1 + delta
+        # pt_y5 = pt_y2 + delta
+        # pt_y6 = pt_y3 + delta
         cv2.line(img,(pt_x1, pt_y1),(pt_x2, pt_y2), color,thickness)
-        cv2.line(img,(pt_x1, pt_y1),(pt_x2, pt_y2), color,thickness)
-        cv2.line(img,(pt_x1, pt_y1),(pt_x2, pt_y2), color,thickness)
-        cv2.line(img,(pt_x1, pt_y1),(pt_x2, pt_y2), color,thickness)
-        cv2.line(img,(pt_x1, pt_y1),(pt_x2, pt_y2), color,thickness)
-        cv2.line(img,(pt_x1, pt_y1),(pt_x2, pt_y2), color,thickness)
+        cv2.line(img,(pt_x2, pt_y2),(pt_x3, pt_y3), color,thickness)
+        cv2.line(img,(pt_x3, pt_y3),(pt_x3, pt_y3 + delta), color,thickness)
+        cv2.line(img,(pt_x3, pt_y3 + delta),(pt_x2, pt_y2 + delta), color,thickness)
+        cv2.line(img,(pt_x2, pt_y2 + delta),(pt_x1, pt_y1 + delta), color,thickness)
+        cv2.line(img,(pt_x1, pt_y1 + delta),(pt_x1, pt_y1), color,thickness)
+
+def fill_hexagon(img,hexs,color,thickness = 1):
+    '''
+    Fills in the convex polygon points defined by hexs on img
+    param img: image to draw rectangles on
+    param rects: list of rectangles to draw, format [(x1, y1, x2, y2), ...]
+    param color: color to draw the rectangles, (R, G, B) coordinate.
+    '''
+    for pt_x1, pt_y1, pt_x2, pt_y2, pt_x3, pt_y3  in hexs:
+        delta = 5
+        points = np.array([[pt_x1, pt_y1],[pt_x2, pt_y2],[pt_x3, pt_y3],[pt_x3, pt_y3 + delta] \
+            [pt_x2, pt_y2 + delta],[pt_x1, pt_y1 + delta]], dtype = np.int32)
+            # np.int32 is an array type and specific conversion to an integer
+        print(color)
+        print(points)
+        cv2.fillConvexPoly(img, points, color)
 
 def draw_ellipses(img, ellipses, color,thickness):
     '''
@@ -59,6 +88,7 @@ def draw_ellipses(img, ellipses, color,thickness):
         # Drawing your face
         cv.ellipse(img,(center_x1,center_y1),(axes_x1,axes_y1), \
         0,0,360,color,thickness)
+
 # CITATION: used for drawing rects, ellipses and making lines
 # used and altered from https://docs.opencv.org/3.4/dc/da5/tutorial_py_drawing_functions.html
 # cv2.line(img, p1, p2, (255, 0, 0), 3)
@@ -75,12 +105,18 @@ def draw_triangle(img,triangle,color,thickness = 2):
         cv2.line(img,(pt_x2, pt_y2),(pt_x3, pt_y3), color,thickness)
         cv2.line(img,(pt_x3, pt_y3),(pt_x1, pt_y1), color,thickness)
 
-# def fill_triangle(img,triangle,color,thickness = 1):
-#     for pt_x1, pt_y1, pt_x2, pt_y2, pt_x3, pt_y3, in triangle:
-#         points = np.array([[pt_x1, pt_y1],[pt_x2, pt_y2],[pt_x3, pt_y3]], dtype=np.int32)
-#         print(color)
-#         print(points)
-#         cv2.fillConvexPoly(img, points, color)
+def fill_triangle(img,triangle,color,thickness = 1):
+    '''
+    Fills in the convex polygon with 3 coordinates defined by triangles on img
+    param img: image to draw rectangles on
+    param rects: list of rectangles to draw, format [(x1, y1, x2, y2), ...]
+    param color: color to draw the rectangles, (R, G, B) coordinate.
+    '''
+    for pt_x1, pt_y1, pt_x2, pt_y2, pt_x3, pt_y3, in triangle:
+        points = np.array([[pt_x1, pt_y1],[pt_x2, pt_y2],[pt_x3, pt_y3]], dtype = np.int32)
+        print(color)
+        print(points)
+        cv2.fillConvexPoly(img, points, color)
 
 class App:
     # Keep track of what state your program is in
@@ -103,33 +139,11 @@ class App:
         # creating label outside function, making it a global variable and can be used everywhere
         self.Heading1 = Label(self.window, text = "State:{}".format(self._state),\
         width = 40 , font = ("Helvetica",20), bg = 'RosyBrown1', pady = 2)
-        self.l2 = Label(self.window,text = "Skin Tone Questionaire",   \
-        width = 40, anchor = CENTER, font = ("Helvetica", 16),bg = 'RosyBrown1', pady = 2)
-        self.l3 = Label(self.window,text = 'Look at the veins on your wrist',\
-        width = 40, anchor = NW, font = ("Helvetica", 16), bg = 'RosyBrown1', pady = 2)
-        self.l4 = Label(self.window, text = 'If you mostly see blue/purple veins, then you are cool toned', \
-        width = 47, anchor = NW, font = ("Helvetica", 16), bg = 'RosyBrown1', pady = 2)
-        self.l5 = Label(self.window, text = "If you mostly see green veins, then" \
-        " you're warm toned", width = 47, anchor = NW, font = ("Helvetica" , 16), bg = 'RosyBrown1', pady = 2)
-        self.l6 = Label(self.window, text = "If you mostly see a blend of" \
-        " both blue/purple and green veins,", width = 47, anchor = NW, font = ("Helvetica, 16"),\
-        bg = 'RosyBrown1', pady = 2)
-        self.l7 = Label(self.window, text = " then you're neutral toned", \
-        width = 20, anchor = W, font = ("Helvetica" , 16), bg = 'RosyBrown1', pady = 2)    
-        self.l8 = Label(self.window, text = 'Check in one of the boxes that accurately' \
-        ' matches your', width = 47, anchor = NW, font =("Helvetica", 16),bg = 'RosyBrown1', pady = 2)
-        self.l9 = Label(self.window, text = 'description', width = 20, anchor = NW, font =("Helvetica", 16),\
-        bg = 'RosyBrown1', pady = 2)
-        self.l10 = Label(self.window, text = 'User must be in bright lighting for application to correctly work',\
-        width = 47, anchor = NW, font =("Helvetica", 16), bg = 'RosyBrown1', pady = 2)
-        self.resultlabel1 = Label(self.window)
-        
         self.photo1 = Image.open('Cover.png')
-        # self.photo1 = ImageTk.PhotoImage(self.photo1)
         self.photo1 = self.photo1.resize((800, 600),Image.ANTIALIAS)
         self.photo1 = ImageTk.PhotoImage(self.photo1)
         self.photo2 = Image.open('Questionnaire.png')
-        self.photo2 = self.photo2.resize((700,500),Image.ANTIALIAS)
+        self.photo2 = self.photo2.resize((800,500),Image.ANTIALIAS)
         self.photo2 = ImageTk.PhotoImage(self.photo2)
         self.l11 = Label(self.window, image = self.photo1)
         self.l12 = Label(self.window, text = f'Your closest match is:{self.vid.face_results}')
@@ -185,8 +199,6 @@ class App:
         # Respond to clicks
         self.canvas.bind("<Button-1>", self.callback_mouse)
 
-        # self.canvas.grid()
-
         # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
         self.update()
@@ -199,12 +211,11 @@ class App:
         what next state to go to and what actions to take
         :param action: The action that occurred
         '''
-
         if self._state == STATE_MENU:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_SKIN_TONE
                 self.l11.grid_remove()
-                # self._button['text'] = 'Next'
+                self.l14.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_MENU
@@ -213,21 +224,12 @@ class App:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_FACE
                 self.canvas.grid()
+                self.l14.grid_remove()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_MENU
                 self._button_start.grid_forget()
                 self.Heading1.grid_remove()
-                self.l2.grid_remove()
-                self.l3.grid_remove()
-                self.l4.grid_remove()
-                self.l4.grid_remove()
-                self.l5.grid_remove()
-                self.l6.grid_remove()
-                self.l7.grid_remove()
-                self.l8.grid_remove()
-                self.l9.grid_remove()
-                self.l10.grid_remove()
                 self.l11.grid()
 
         elif self._state == STATE_FACE:
@@ -241,8 +243,6 @@ class App:
         elif self._state == STATE_FACE_BOX:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_FACE_BOX_RESULTS
-                # self.l12.grid()
-                # self.l13.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_FACE
@@ -274,7 +274,6 @@ class App:
         elif self._state == STATE_BLUSH:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_BLUSH_RESULTS
-                # self.l13.grid(row = 1, column = 0)
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_EYES_RESULTS
@@ -365,7 +364,6 @@ class App:
     def callback_mouse(self, event):
         self._state += 1
         print("clicked at", event.x, event.y) 
-        
         '''
         You can do something like if the click is within some region,
         then change the state to something
@@ -380,7 +378,6 @@ class App:
         global resultlabel1
         if self._state == STATE_MENU:
             self._button_start.grid(row = 5, column = 0)
-            # self.l1.grid(row = 0, column=5)
             self.l11.grid(row = 0, column = 0)
             self.Heading1.grid_remove()
             self._button_next.grid_remove()
@@ -391,31 +388,21 @@ class App:
             self._button_warm.grid_remove()
             self.l12.grid_remove()
             self.l13.grid_remove()
-            self.resultlabel1.config(text=self.l11)
+            self.l14.grid_remove()
             rect = self.canvas.create_rectangle(50,25,150,75,fill = 'RosyBrown1')
 
         elif self._state == STATE_SKIN_TONE:
             self.Heading1.grid_remove()
-            self._button_next.grid(row = 4, column = 2)
-            self._button_back.grid(row = 4, column = 0)
+            self.l14.grid(row = 1, column = 1)
+            self._button_next.grid(row = 1, column = 2)
+            self._button_back.grid(row = 1, column = 0)
             self._button_start.grid_remove()
-            # self.l1.grid_remove()
-            self.l2.grid(row = 0,column = 1)
-            self.l3.grid(row = 1,column = 1)
-            self.l4.grid(row = 2,column = 1)
-            self.l5.grid(row = 3,column = 1)
-            self.l6.grid(row = 4,column = 1)
-            self.l7.grid(row = 5,column = 1)
-            self.l8.grid(row = 6,column = 1)
-            self.l9.grid(row = 7,column = 1)
-            self.l10.grid(row = 8, column = 1)
             self.l12.grid_remove()
             self.l13.grid_remove()
-            self._button_cool.grid(row = 10, column = 0)
-            self._button_neutral.grid(row = 10, column = 1)
-            self._button_warm.grid(row = 10, column = 2)
-            self.resultlabel1.config(text = self.l2)
-            # Label1 = Label(self.window, text = f'{}')
+            self._button_cool.grid(row = 0, column = 0)
+            self._button_neutral.grid(row = 0, column = 1)
+            self._button_warm.grid(row = 0, column = 2)
+           
             # Get a frame from the video source
             # Pass our current state to know which box to draw
         elif self._state == STATE_FACE_BOX_RESULTS:  
@@ -423,9 +410,13 @@ class App:
             self.l12 = Label(self.window, text = f'Your closest match is:{self.vid.face_results}')
             self.l12.grid(row = 0, column = 0)
 
-        
-            # self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.vid.recommended_color}')
-            # self.l13.grid(row = 1, column = 0)
+        elif self._state == STATE_EYES_RESULTS:
+            ret, frame = self.vid.get_frame(self._state,self._tone)
+            if ret:
+                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
+                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
+            self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.vid.recommended_color}')
+            self.l13.grid(row = 1, column = 0)
 
         elif self._state == STATE_BLUSH_RESULTS:
             
@@ -433,7 +424,6 @@ class App:
             if ret:
                 self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
                 self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
-            print('ret',ret)
             self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.vid.recommended_color}')
             self.l13.grid(row = 1, column = 0)
         
@@ -463,23 +453,13 @@ class App:
 
         else:
             self.Heading1.grid(row = 0, column = 0)
-            self.l2.grid_remove()
-            self.l3.grid_remove()
-            self.l4.grid_remove()
-            self.l4.grid_remove()
-            self.l5.grid_remove()
-            self.l6.grid_remove()
-            self.l7.grid_remove()
-            self.l8.grid_remove()
-            self.l9.grid_remove()
-            self.l10.grid_remove()
+            self.l11.grid_remove()
             self.l12.grid_remove()
             self.l13.grid_remove()
             self._button_cool.grid_remove()
             self._button_neutral.grid_remove()
             self._button_warm.grid_remove()
-            # Label1 = Label(self.window, text = "State:{}".format(self._state),\
-            # width = 40 , font = ("Helvetica",12))
+
         # try:
             ret, frame = self.vid.get_frame(self._state,self._tone)
 
@@ -534,7 +514,6 @@ class VideoCapture:
                 # Copy image so we can draw on it
                 # img = original git
                 vis = img.copy()
-                
 
                 # Facial Feature detection
                 # color formatting is (blue ,green, red)
@@ -549,25 +528,29 @@ class VideoCapture:
                             self.face_results = find_skintone(vis, rects)
                 
                 elif state == STATE_EYES:
-                    eye_rects = get_eye(rects)
+                    eye_rects = find_eye(rects)
                     print('eye_rects', eye_rects)
-                    draw_rects(vis,eye_rects,(255,0,0))
+                    draw_hexagon(vis,eye_rects,(255,0,0))
+
+                elif state == STATE_EYES_RESULTS:
+                    eye_rects = find_eye(rects)
+                    fillcolor = COLOR_PALETTE[self.face_results][FEATURE_EYES][tone][0]
+                    fill_hexagon(vis,eye_rects,fillcolor, thickness = -1)
+                    self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_CHEEKS][tone][1]
+                    print(self.recommended_color)
                 
                 elif state == STATE_BLUSH:  
                     cheek_rects = find_cheeks(rects)   
                     draw_rects(vis,cheek_rects,(0, 0, 255))
 
                 elif state == STATE_BLUSH_RESULTS:
-                    
                     #citation: https://docs.opencv.org/2.4/modules/core/doc/drawing_functions.html
                     print(self.face_results, FEATURE_CHEEKS, tone)
                     cheek_rects = find_cheeks(rects)
                     fillcolor = COLOR_PALETTE[self.face_results][FEATURE_CHEEKS][tone][0]
                     draw_rects(vis,cheek_rects,fillcolor,thickness = -1)
                     draw_rects(vis,cheek_rects,(0, 0, 255))
-                    # if self.recommended_color == None:
                     self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_CHEEKS][tone][1]
-                    print(self.recommended_color)
     
                 elif state == STATE_HIGHLIGHTER:
                     upper_cheeks = find_upper_cheeks(rects)
@@ -577,7 +560,6 @@ class VideoCapture:
                     upper_cheeks = find_upper_cheeks(rects)
                     fillcolor = COLOR_PALETTE[self.face_results][FEATURE_UPPER_CHEEKS][tone][0]
                     fill_triangle(vis,upper_cheeks,fillcolor,thickness = -1)
-                    # draw_triangle(vis,upper_cheeks,(255,255,0))
                     self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_UPPER_CHEEKS][tone][1]
                     # fill in the shape
 
@@ -589,10 +571,8 @@ class VideoCapture:
                     cheek_bones = find_cheek_bones(rects)
                     fillcolor = COLOR_PALETTE[self.face_results][FEATURE_CHEEK_BONES][tone][0]
                     fill_triangle(vis,cheek_bones,fillcolor,thickness = -1)
-                    # draw_triangle(vis,cheek_bones,(0,255,255),thickness = 1)
                     self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_CHEEK_BONES][tone][1]
                     
-
                 elif state == STATE_LIP:
                     lip_ellipses = find_lips(rects)
                     draw_ellipses(vis, lip_ellipses,(255,0,255),thickness = 1)
@@ -604,14 +584,6 @@ class VideoCapture:
                     self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_LIPS][tone][1]
                     print(self.recommended_color)
 
-                # elif state == STATE_EYES:
-                #     # Eye detection
-                #     if not self.nested.empty():
-                #         for x1, y1, x2, y2 in rects:
-                #             roi = gray[y1:y2, x1:x2]
-                #             vis_roi = vis[y1:y2, x1:x2]
-                #             subrects = detect(roi.copy(), self.nested)
-                #             draw_rects(vis_roi, subrects, (255, 0, 0))
                 # add weighted function
                 
                 # Return a boolean success flag and the current frame converted to BGR
@@ -619,7 +591,6 @@ class VideoCapture:
                 cv2.addWeighted(vis, opacity, img, 1 - opacity, 0, img)
                 # Flip image so that the feed is mirrored to the user
                 img= cv2.flip(img, 1)
-
 
                 # Return a boolean success flag and the current frame converted to BGR
                 return (ret, cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
@@ -638,4 +609,4 @@ if __name__ == '__main__':
     print('Application of Beauty \nPress <Esc> anytime to quit.')
 
     # Start tkinter
-    App(Tk(), "Makeup")
+    App(Tk(), "Application of Beauty")
