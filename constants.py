@@ -18,6 +18,7 @@ STATE_LIP_RESULTS = 15
 # Button action identifiers
 ACTION_BUTTON_NEXT  = 1
 ACTION_BUTTON_BACK  = 2
+ACTION_UPDATE_TEXT  = 3
 
 # Button time in seconds
 BUTTON_TIME_REQUIRED = 0.5

@@ -125,13 +125,14 @@ class App:
 
     def __init__(self, window, window_title, video_source = 0): # many video sources, which camera are we using
         self.window = window
-        self.window.minsize(800,600) 
-        self.window.maxsize(800,700)
+        self.window.minsize(800,700) 
+        self.window.maxsize(900,700)
         self.window.title(window_title)
         self.window.bind('<Escape>', lambda e: self.window.quit()) # can't write def in one line, make it as e
         self.video_source = video_source
         # playsound('Zora.mp3', False)
         self._state = STATE_MENU
+        self._tone = None
         # self._face_feature = FACE
         self._button_last_clicked = time()
         # open video source (by default this will try to open the computer webcam)
@@ -151,16 +152,15 @@ class App:
         self.recommended_color = None
         self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.recommended_color}')
         self.l14 = Label(self.window, image = self.photo2)
-        self.color_slider = Scale(self.window, from_=0, to = 100, orient= HORIZONTAL)
-        self.l11.grid(row = 0, column = 0)
-        
-        # create button
-        # CITATION: https://www.python-course.eu/tkinter_buttons.php
+        self.color_slider = Scale(self.window, from_=0, to = 100, orient= HORIZONTAL, command = self.update_slider_value)
 
         # define font
         self.text = Text(self.window)
         self.myFont = Font(family = 'New Courier')
         self.text.configure(font = self.myFont)
+
+        ## Create buttons
+        # CITATION: https://www.python-course.eu/tkinter_buttons.php
         self._button_start = Button(self.window, 
                    text = 'Start', 
                    fg = "black",
@@ -202,8 +202,9 @@ class App:
         self.canvas = Canvas(window, width = self.vid.width, height = self.vid.height)
 
         # Respond to clicks
-        self.canvas.bind("<Button-1>", self.callback_mouse)
+        self.l11.grid(row = 0, column = 0)
         rect = self.canvas.create_rectangle(50,25,150,75,fill = 'RosyBrown1')
+
         # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
         self.update()
@@ -222,12 +223,22 @@ class App:
                 self.l11.grid_remove()
                 self.l14.grid()
 
+                self.Heading1.grid_remove()
+                self.l12.grid_remove()
+                self.l13.grid_remove()
+                self.l14.grid(row = 1, column = 1)
+                self._button_start.grid_remove()
+
+                # Buttons for the skin tone menu
+                self._button_next.grid(row = 1, column = 2)
+                self._button_back.grid(row = 1, column = 0)
+                self._button_cool.grid(row = 0, column = 0)
+                self._button_neutral.grid(row = 0, column = 1)
+                self._button_warm.grid(row = 0, column = 2)
+
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_MENU
                 self.Heading1.grid_remove()
-                self._button_next.grid_remove()
-                self._button_back.grid_remove()
-                self._button_back.grid_remove()
                 self._button_cool.grid_remove()
                 self._button_neutral.grid_remove()
                 self._button_warm.grid_remove()
@@ -240,6 +251,14 @@ class App:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_FACE
                 self.canvas.grid(row = 1, column = 1)
+                self.Heading1.grid_remove()
+                self._button_cool.grid_remove()
+                self._button_neutral.grid_remove()
+                self._button_warm.grid_remove()
+
+                self.l12.grid_remove()
+                self.l13.grid_remove()
+                self.l14.grid_remove()
                 self.l14.grid_remove()
 
             elif action == ACTION_BUTTON_BACK:
@@ -269,6 +288,7 @@ class App:
         elif self._state == STATE_FACE_BOX:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_FACE_BOX_RESULTS
+                self.l12.grid(row = 0, column = 1)
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_FACE
@@ -282,6 +302,9 @@ class App:
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_FACE_BOX
+
+            elif action == ACTION_UPDATE_TEXT:
+                self.l12['text'] = f'Your closest match is: {self.vid.face_results}'
 
         elif self._state == STATE_EYES:
             if action == ACTION_BUTTON_NEXT:
@@ -364,7 +387,7 @@ class App:
             self._state = self.vid.get_frame(self._state,self._tone)
 
         print('Action: {} New State:{}'.format(action, self._state))
-        
+    
     # button time created so the user can't spam the button
     def button_func(self): 
         '''
@@ -391,100 +414,27 @@ class App:
         self._tone = tone
         print('tone',self._tone)
 
+    def update_slider_value(self, value):
+        self.vid.update_slider(value)
+
     def recommended_color(self,color):
         self.recommended_color = color
         print('color',self.recommended_color)
 
-    def callback_mouse(self, event):
-        self._state += 1
-        print("clicked at", event.x, event.y) 
-        '''
-        You can do something like if the click is within some region,
-        then change the state to something
-        '''
-        print("State is now {}".format(self._state))
-
-# actually does graphics
+    # actually does graphics
     def update(self):
         '''
         Called every self.delay milliseconds
         '''
-        global resultlabel1
-        if self._state == STATE_SKIN_TONE:
-            self.Heading1.grid_remove()
-            self.l14.grid(row = 1, column = 1)
-            self._button_next.grid(row = 1, column = 2)
-            self._button_back.grid(row = 1, column = 0)
-            self._button_start.grid_remove()
-            self.l12.grid_remove()
-            self.l13.grid_remove()
-            self._button_cool.grid(row = 0, column = 0)
-            self._button_neutral.grid(row = 0, column = 1)
-            self._button_warm.grid(row = 0, column = 2)
-           
-            # Get a frame from the video source
-            # Pass our current state to know which box to draw
-        elif self._state == STATE_FACE_BOX_RESULTS:  
-            ret, frame = self.vid.get_frame(self._state,self._tone)
-            self.l12 = Label(self.window, text = f'Your closest match is:{self.vid.face_results}')
-            self.l12.grid(row = 0, column = 0)
-
-        elif self._state == STATE_EYES_RESULTS:
-            ret, frame = self.vid.get_frame(self._state,self._tone)
-            if ret:
-                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
-                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
-            self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.vid.recommended_color}')
-            self.l13.grid(row = 1, column = 0)
-
-        elif self._state == STATE_BLUSH_RESULTS:
-            
-            ret, frame = self.vid.get_frame(self._state,self._tone)
-            if ret:
-                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
-                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
-            self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.vid.recommended_color}')
-            self.l13.grid(row = 1, column = 0)
-        
-        elif self._state == STATE_HIGHLIGHTER_RESULTS:
-            ret, frame = self.vid.get_frame(self._state,self._tone)
-            if ret:
-                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
-                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
-            self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.vid.recommended_color}')
-            self.l13.grid(row = 1, column = 0)
-
-        elif self._state == STATE_CONTOUR_RESULTS:
-            ret, frame = self.vid.get_frame(self._state,self._tone)
-            if ret:
-                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
-                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
-            self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.vid.recommended_color}')
-            self.l13.grid(row = 1, column = 0)
-
-        elif self._state == STATE_LIP_RESULTS:
-            ret, frame = self.vid.get_frame(self._state,self._tone)
-            if ret:
-                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
-                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
-            self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.vid.recommended_color}')
-            self.l13.grid(row = 1, column = 0)
-
-        else:
-            self.Heading1.grid(row = 0, column = 0)
-            self.l11.grid_remove()
-            self.l12.grid_remove()
-            self.l13.grid_remove()
-            self._button_cool.grid_remove()
-            self._button_neutral.grid_remove()
-            self._button_warm.grid_remove()
-
         # try:
-            ret, frame = self.vid.get_frame(self._state,self._tone)
+        ret, frame = self.vid.get_frame(self._state,self._tone)
 
-            if ret:
-                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
-                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
+        # Update label text if anything exists
+        self.update_fsm(ACTION_UPDATE_TEXT)
+
+        if ret:
+            self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
+            self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
 
         self.window.after(self.delay, self.update)
 
@@ -510,6 +460,13 @@ class VideoCapture:
         nested_fn  = args.get('--nested-cascade', "haarcascade_eye.xml")
         self.cascade = cv.CascadeClassifier(cv.samples.findFile(cascade_fn))
         self.nested = cv.CascadeClassifier(cv.samples.findFile(nested_fn))
+
+        # Default opacity
+        self.opacity = 0.5
+
+    def update_slider(self, value):
+        print(f'New slider value: {value}')
+        self.opacity = float(value)/100
 
     def get_frame(self,state,tone):
         if self.vid.isOpened():
@@ -539,12 +496,13 @@ class VideoCapture:
                     
                 if state == STATE_FACE_BOX:
                     draw_rects(vis, rects, (0, 255, 0))
-                # elif state == STATE_SKIN_TONE:
 
                 elif state == STATE_FACE_BOX_RESULTS:
                     if len(rects) > 0:
+                        # Only find skintone once
                         if self.face_results == None:
                             self.face_results = find_skintone(vis, rects)
+                            print(f'Detected skintone as {self.face_results}')
                 
                 elif state == STATE_EYES:
                     eye_rects = find_eye(rects)
@@ -606,8 +564,7 @@ class VideoCapture:
                 # add weighted function
                 
                 # Return a boolean success flag and the current frame converted to BGR
-                opacity = 0.5
-                cv2.addWeighted(vis, opacity, img, 1 - opacity, 0, img)
+                cv2.addWeighted(vis, self.opacity, img, 1 - self.opacity, 0, img)
                 # Flip image so that the feed is mirrored to the user
                 img= cv2.flip(img, 1)
 
