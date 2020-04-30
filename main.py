@@ -20,103 +20,13 @@ def detect(img, cascade):
         scaleFactor=1.3, 
         minNeighbors=4, 
         minSize=(30, 30), 
-        flags=cv.CASCADE_SCALE_IMAGE
+        flags=cv2.CASCADE_SCALE_IMAGE
     )
 
     if len(rects) == 0:
         return []
     rects[:,2:] += rects[:,:2]
     return rects
-
-def draw_rects(img, rects, color,thickness = 2):
-    '''
-    Draws the rectangles defined by rects on img
-    param img: image to draw rectangles on
-    param rects: list of rectangles to draw, format [(x1, y1, x2, y2), ...]
-    param color: color to draw the rectangles, (R, G, B) coordinate.
-    '''
-    for x1, y1, x2, y2 in rects:
-        # Drawing your face
-        cv.rectangle(img, (x1, y1), (x2, y2), color, thickness)
-
-def draw_hexagon(img, hexs, color, thickness = 1):
-    '''
-    Connects the points defined by hexs on img
-    param img: image to draw rectangles on
-    param rects: list of rectangles to draw, format [(x1, y1, x2, y2), ...]
-    param color: color to draw the rectangles, (R, G, B) coordinate.
-    '''
-    for pt_x1, pt_y1, pt_x2, pt_y2, pt_x3, pt_y3  in hexs:
-        delta = 5
-        # pt_x1 = pt_x4
-        # pt_x2 = pt_x5
-        # pt_x3 = pt_x6
-        # pt_y4 = pt_y1 + delta
-        # pt_y5 = pt_y2 + delta
-        # pt_y6 = pt_y3 + delta
-        cv2.line(img,(pt_x1, pt_y1),(pt_x2, pt_y2), color,thickness)
-        cv2.line(img,(pt_x2, pt_y2),(pt_x3, pt_y3), color,thickness)
-        cv2.line(img,(pt_x3, pt_y3),(pt_x3, pt_y3 + delta), color,thickness)
-        cv2.line(img,(pt_x3, pt_y3 + delta),(pt_x2, pt_y2 + delta), color,thickness)
-        cv2.line(img,(pt_x2, pt_y2 + delta),(pt_x1, pt_y1 + delta), color,thickness)
-        cv2.line(img,(pt_x1, pt_y1 + delta),(pt_x1, pt_y1), color,thickness)
-
-def fill_hexagon(img,hexs,color,thickness = 1):
-    '''
-    Fills in the convex polygon points defined by hexs on img
-    param img: image to draw rectangles on
-    param rects: list of rectangles to draw, format [(x1, y1, x2, y2), ...]
-    param color: color to draw the rectangles, (R, G, B) coordinate.
-    '''
-    for pt_x1, pt_y1, pt_x2, pt_y2, pt_x3, pt_y3  in hexs:
-        delta = 5
-        points = np.array([[pt_x1, pt_y1],[pt_x2, pt_y2],[pt_x3, pt_y3],[pt_x3, pt_y3 + delta], \
-            [pt_x2, pt_y2 + delta],[pt_x1, pt_y1 + delta]], dtype = np.int32)
-            # np.int32 is an array type and specific conversion to an integer
-        print(color)
-        print(points)
-        cv2.fillConvexPoly(img, points, color)
-
-def draw_ellipses(img, ellipses, color,thickness):
-    '''
-    Draws the rectangles defined by rects on img
-    param img: image to draw rectangles on
-    param rects: list of rectangles to draw, format [(x1, y1, x2, y2), ...]
-    param color: color to draw the rectangles, (R, G, B) coordinate.
-    '''
-    for center_x1, center_y1, axes_x1, axes_y1 in ellipses:
-        # Drawing your face
-        cv.ellipse(img,(center_x1,center_y1),(axes_x1,axes_y1), \
-        0,0,360,color,thickness)
-
-# CITATION: used for drawing rects, ellipses and making lines
-# used and altered from https://docs.opencv.org/3.4/dc/da5/tutorial_py_drawing_functions.html
-# cv2.line(img, p1, p2, (255, 0, 0), 3)
-
-def draw_triangle(img,triangle,color,thickness = 2):
-    '''
-    Creates 3 coordinates defined by rects on img
-    param img: image to draw rectangles on
-    param rects: list of rectangles to draw, format [(x1, y1, x2, y2), ...]
-    param color: color to draw the rectangles, (R, G, B) coordinate.
-    '''
-    for pt_x1, pt_y1, pt_x2, pt_y2, pt_x3, pt_y3, in triangle:
-        cv2.line(img,(pt_x1, pt_y1),(pt_x2, pt_y2), color,thickness)
-        cv2.line(img,(pt_x2, pt_y2),(pt_x3, pt_y3), color,thickness)
-        cv2.line(img,(pt_x3, pt_y3),(pt_x1, pt_y1), color,thickness)
-
-def fill_triangle(img,triangle,color,thickness = 1):
-    '''
-    Fills in the convex polygon with 3 coordinates defined by triangles on img
-    param img: image to draw rectangles on
-    param rects: list of rectangles to draw, format [(x1, y1, x2, y2), ...]
-    param color: color to draw the rectangles, (R, G, B) coordinate.
-    '''
-    for pt_x1, pt_y1, pt_x2, pt_y2, pt_x3, pt_y3, in triangle:
-        points = np.array([[pt_x1, pt_y1],[pt_x2, pt_y2],[pt_x3, pt_y3]], dtype = np.int32)
-        print(color)
-        print(points)
-        cv2.fillConvexPoly(img, points, color)
 
 class App:
     # Keep track of what state your program is in
@@ -126,11 +36,12 @@ class App:
     def __init__(self, window, window_title, video_source = 0): # many video sources, which camera are we using
         self.window = window
         self.window.minsize(800,700) 
-        self.window.maxsize(900,700)
+        # self.window.maxsize(900,700)
         self.window.title(window_title)
         self.window.bind('<Escape>', lambda e: self.window.quit()) # can't write def in one line, make it as e
         self.video_source = video_source
-        # playsound('Zora.mp3', False)
+        # citation: https://pythonbasics.org/python-play-sound/
+        playsound('Zora.mp3', False)
         self._state = STATE_MENU
         self._tone = None
         # self._face_feature = FACE
@@ -145,13 +56,18 @@ class App:
         self.photo1 = self.photo1.resize((800, 600),Image.ANTIALIAS)
         self.photo1 = ImageTk.PhotoImage(self.photo1)
         self.photo2 = Image.open('Questionnaire.png')
-        self.photo2 = self.photo2.resize((800, 600),Image.ANTIALIAS)
+        self.photo2 = self.photo2.resize((800, 500),Image.ANTIALIAS)
         self.photo2 = ImageTk.PhotoImage(self.photo2)
+        self.photo3 = Image.open('Last_Page.png')
+        self.photo3 = self.photo3.resize((800, 500),Image.ANTIALIAS)
+        self.photo3 = ImageTk.PhotoImage(self.photo3)
         self.l11 = Label(self.window, image = self.photo1)
-        self.l12 = Label(self.window, text = f'Your closest match is:{self.vid.face_results}')
+        self.l12 = Label(self.window, text = f'Your closest match is: {self.vid.face_results}')
         self.recommended_color = None
-        self.l13 = Label(self.window, text = f'Your closest makeup color match is:{self.recommended_color}')
+        self.l13 = Label(self.window, text = f'Your closest makeup color match is: {self.vid.recommended_color}')
+        # self.l13 = Label(self.window, text = '')
         self.l14 = Label(self.window, image = self.photo2)
+        self.l15 = Label(self.window, image = self.photo3)
         self.color_slider = Scale(self.window, from_=0, to = 100, orient= HORIZONTAL, command = self.update_slider_value)
 
         # define font
@@ -249,12 +165,16 @@ class App:
             
         elif self._state == STATE_SKIN_TONE:
             if action == ACTION_BUTTON_NEXT:
-                self._state = STATE_FACE
-                self.canvas.grid(row = 1, column = 1)
-                self.Heading1.grid_remove()
-                self._button_cool.grid_remove()
-                self._button_neutral.grid_remove()
-                self._button_warm.grid_remove()
+                # you have to click an undertone or else you can't proceed forward with the program
+                if self._tone == None:
+                    return None
+                else:
+                    self._state = STATE_FACE
+                    self.canvas.grid(row = 1, column = 1)
+                    self.Heading1.grid_remove()
+                    self._button_cool.grid_remove()
+                    self._button_neutral.grid_remove()
+                    self._button_warm.grid_remove()
 
                 self.l12.grid_remove()
                 self.l13.grid_remove()
@@ -263,7 +183,7 @@ class App:
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_MENU
-                self._button_start.grid_forget()
+                self._button_start.grid()
                 self.Heading1.grid_remove()
                 self.l11.grid()
                 self.Heading1.grid_remove()
@@ -288,6 +208,7 @@ class App:
         elif self._state == STATE_FACE_BOX:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_FACE_BOX_RESULTS
+                self.l12.grid()
                 self.l12.grid(row = 0, column = 1)
 
             elif action == ACTION_BUTTON_BACK:
@@ -302,6 +223,8 @@ class App:
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_FACE_BOX
+                self.l12.grid_remove()
+                self.l13.grid_remove()
 
             elif action == ACTION_UPDATE_TEXT:
                 self.l12['text'] = f'Your closest match is: {self.vid.face_results}'
@@ -310,6 +233,8 @@ class App:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_EYES_RESULTS
                 self.color_slider.grid()
+                self.l12.grid(row = 0, column = 0)
+                self.l13.grid(row = 0, column = 1)
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_FACE_BOX_RESULTS
@@ -317,14 +242,20 @@ class App:
         elif self._state == STATE_EYES_RESULTS:  
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_BLUSH
+                self.l13.grid_remove()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_EYES
+
+            elif action == ACTION_UPDATE_TEXT:
+                self.l12.grid_remove()
+                self.l13['text'] = f'Your closest makeup color match is: {self.vid.recommended_color}'
 
         elif self._state == STATE_BLUSH:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_BLUSH_RESULTS
                 self.color_slider.grid()
+                self.l13.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_EYES_RESULTS
@@ -334,15 +265,20 @@ class App:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_HIGHLIGHTER
                 self.color_slider.grid_remove()
+                self.l13.grid_remove()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_BLUSH
                 self.color_slider.grid_remove()
 
+            elif action == ACTION_UPDATE_TEXT:
+                self.l13['text'] = f'Your closest makeup color match is: {self.vid.recommended_color}'
+
         elif self._state == STATE_HIGHLIGHTER:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_HIGHLIGHTER_RESULTS
                 self.color_slider.grid()
+                self.l13.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_BLUSH_RESULTS
@@ -350,14 +286,19 @@ class App:
         elif self._state == STATE_HIGHLIGHTER_RESULTS:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_CONTOUR
+                self.l13.grid_remove()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_HIGHLIGHTER
+
+            elif action == ACTION_UPDATE_TEXT:
+                self.l13['text'] = f'Your closest makeup color match is: {self.vid.recommended_color}'
 
         elif self._state == STATE_CONTOUR:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_CONTOUR_RESULTS
                 self.color_slider.grid()
+                self.l13.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_HIGHLIGHTER_RESULTS
@@ -365,26 +306,45 @@ class App:
         elif self._state == STATE_CONTOUR_RESULTS:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_LIP
+                self.l13.grid_remove()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_CONTOUR
+
+            elif action == ACTION_UPDATE_TEXT:
+                self.l13['text'] = f'Your closest makeup color match is: {self.vid.recommended_color}'
 
         elif self._state == STATE_LIP:
             if action == ACTION_BUTTON_NEXT:
                 self._state = STATE_LIP_RESULTS
                 self.color_slider.grid()
+                self.l13.grid()
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_CONTOUR_RESULTS
 
         elif self._state == STATE_LIP_RESULTS:
-            if action == ACTION_BUTTON_BACK:
+            if action == ACTION_BUTTON_NEXT:
+                self._state == STATE_RESULTS
+
+            elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_LIP
+            
+            elif action == ACTION_UPDATE_TEXT:
+                self.l13['text'] = f'Your closest makeup color match is: {self.vid.recommended_color}'
+
+        elif self._state == STATE_RESULTS:
+            if action == ACTION_BUTTON_NEXT:
+                self._state == STATE_MENU
+                self.l15.grid()
+
+            elif action == ACTION_BUTTON_BACK:
+                self._state == STATE_LIP_RESULTS
         
         # Default case 
         # Likely something that's wrong
         else:
-            self._state = self.vid.get_frame(self._state,self._tone)
+            self._state = self.vid.get_frame(self._state,self._tone,App)
 
         print('Action: {} New State:{}'.format(action, self._state))
     
@@ -427,7 +387,7 @@ class App:
         Called every self.delay milliseconds
         '''
         # try:
-        ret, frame = self.vid.get_frame(self._state,self._tone)
+        ret, frame = self.vid.get_frame(self._state,self._tone,App)
 
         # Update label text if anything exists
         self.update_fsm(ACTION_UPDATE_TEXT)
@@ -458,8 +418,8 @@ class VideoCapture:
         args = dict(args)
         cascade_fn = args.get('--cascade', "haarcascade_frontalface_alt.xml")
         nested_fn  = args.get('--nested-cascade', "haarcascade_eye.xml")
-        self.cascade = cv.CascadeClassifier(cv.samples.findFile(cascade_fn))
-        self.nested = cv.CascadeClassifier(cv.samples.findFile(nested_fn))
+        self.cascade = cv2.CascadeClassifier(cv2.samples.findFile(cascade_fn))
+        self.nested = cv2.CascadeClassifier(cv2.samples.findFile(nested_fn))
 
         # Default opacity
         self.opacity = 0.5
@@ -468,7 +428,7 @@ class VideoCapture:
         print(f'New slider value: {value}')
         self.opacity = float(value)/100
 
-    def get_frame(self,state,tone):
+    def get_frame(self,state,tone,App):
         if self.vid.isOpened():
             # makes the program handle errors
             try:
@@ -480,8 +440,8 @@ class VideoCapture:
             if ret:
                 # Process image from webcam
                 # Process image
-                gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-                gray = cv.equalizeHist(gray)
+                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                gray = cv2.equalizeHist(gray)
 
                 # Perform face detection
                 
@@ -505,15 +465,15 @@ class VideoCapture:
                             print(f'Detected skintone as {self.face_results}')
                 
                 elif state == STATE_EYES:
-                    eye_rects = find_eye(rects)
+                    eye_rects = get_eye(rects)
                     print('eye_rects', eye_rects)
                     draw_hexagon(vis,eye_rects,(255,0,0))
 
                 elif state == STATE_EYES_RESULTS:
-                    eye_rects = find_eye(rects)
+                    eye_rects = get_eye(rects)
                     fillcolor = COLOR_PALETTE[self.face_results][FEATURE_EYES][tone][0]
                     fill_hexagon(vis,eye_rects,fillcolor, thickness = -1)
-                    self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_CHEEKS][tone][1]
+                    self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_EYES][tone][1]
                     print(self.recommended_color)
                 
                 elif state == STATE_BLUSH:  
