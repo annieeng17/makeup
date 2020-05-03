@@ -99,7 +99,7 @@ def get_eye(rects):
 
     for x1, y1, x2, y2 in rects:
         delta_1 = 15
-        delta_2 = -50
+        delta_2 = -43
         eye_x1 = int(0.3*x1) + int(0.7*x2) + delta_1
         eye_y1 = int(0.4*y1) + int(0.6*y2) + delta_2
         eye_x2 = int(0.4*x1) + int(0.6*x2) + delta_1

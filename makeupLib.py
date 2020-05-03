@@ -113,7 +113,7 @@ COLOR_PALETTE = {
         },
         FEATURE_EYES: {
             UNDERTONE_COOL: ((90, 106, 198), 'Sultry'),
-            UNDERTONE_WARM: ((107, 127, 211), 'Sienna'),
+            UNDERTONE_WARM: ((83, 96, 186), 'Sienna'),
             UNDERTONE_NEUTRAL: ((112, 102, 178), 'Burnt Orange')
         },
         FEATURE_UPPER_CHEEKS: {

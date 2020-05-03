@@ -30,7 +30,6 @@ def detect(img, cascade):
 
 class App:
     # Keep track of what state your program is in
-    # TODO: you should use an enum for this for different states
     _state = 0
 
     def __init__(self, window, window_title, video_source = 0): # many video sources, which camera are we using
@@ -41,7 +40,7 @@ class App:
         self.window.bind('<Escape>', lambda e: self.window.quit()) # can't write def in one line, make it as e
         self.video_source = video_source
         # citation: https://pythonbasics.org/python-play-sound/
-        playsound('Zora.mp3', False)
+        # playsound('Zora.mp3', False)
         self._state = STATE_MENU
         self._tone = None
         # self._face_feature = FACE
@@ -69,7 +68,7 @@ class App:
         self.l14 = Label(self.window, image = self.photo2)
         self.l15 = Label(self.window, image = self.photo3)
         self.color_slider = Scale(self.window, from_=0, to = 100, orient= HORIZONTAL, command = self.update_slider_value)
-
+        self.l16 = Label(self.window, text = f' Your overall makeup results are: {self.vid.recommended_color_list}')
         # define font
         self.text = Text(self.window)
         self.myFont = Font(family = 'New Courier')
@@ -182,20 +181,23 @@ class App:
                 self.l14.grid_remove()
 
             elif action == ACTION_BUTTON_BACK:
-                self._state = STATE_MENU
-                self._button_start.grid()
-                self.Heading1.grid_remove()
-                self.l11.grid()
-                self.Heading1.grid_remove()
-                self._button_next.grid_remove()
-                self._button_back.grid_remove()
-                self._button_back.grid_remove()
-                self._button_cool.grid_remove()
-                self._button_neutral.grid_remove()
-                self._button_warm.grid_remove()
-                self.l12.grid_remove()
-                self.l13.grid_remove()
-                self.l14.grid_remove()
+                if self._tone == None:
+                    return None
+                else:
+                    self._state = STATE_MENU
+                    self._button_start.grid()
+                    self.Heading1.grid_remove()
+                    self.l11.grid()
+                    self.Heading1.grid_remove()
+                    self._button_next.grid_remove()
+                    self._button_back.grid_remove()
+                    self._button_back.grid_remove()
+                    self._button_cool.grid_remove()
+                    self._button_neutral.grid_remove()
+                    self._button_warm.grid_remove()
+                    self.l12.grid_remove()
+                    self.l13.grid_remove()
+                    self.l14.grid_remove()
 
         elif self._state == STATE_FACE:
             if action == ACTION_BUTTON_NEXT:
@@ -203,7 +205,7 @@ class App:
 
             elif action == ACTION_BUTTON_BACK:           
                 self._state = STATE_SKIN_TONE
-                self.canvas.grid_remove()
+                # self.canvas.grid_remove()
                 
         elif self._state == STATE_FACE_BOX:
             if action == ACTION_BUTTON_NEXT:
@@ -326,20 +328,40 @@ class App:
         elif self._state == STATE_LIP_RESULTS:
             if action == ACTION_BUTTON_NEXT:
                 self._state == STATE_RESULTS
+                self.canvas.grid_remove()
+                self.l15.grid()
+                self.l13.grid_remove()
+                self.color_slider.grid_remove()
+                self.l16.grid(row = 0, column = 0)
+                self.l16.grid()
+
+                print(self.vid.recommended_color_list)
 
             elif action == ACTION_BUTTON_BACK:
                 self._state = STATE_LIP
+                self.l16.grid_remove()
             
             elif action == ACTION_UPDATE_TEXT:
                 self.l13['text'] = f'Your closest makeup color match is: {self.vid.recommended_color}'
 
         elif self._state == STATE_RESULTS:
             if action == ACTION_BUTTON_NEXT:
-                self._state == STATE_MENU
-                self.l15.grid()
+                self._state = STATE_MENU
+                
+                self.l13.grid_remove()
+                self.l14.grid()
+                self.l15.grid_remove()
+                self.l16.grid_remove()
+                self._button_start.grid()
+
+
+                # self.l15.grid()
 
             elif action == ACTION_BUTTON_BACK:
-                self._state == STATE_LIP_RESULTS
+                self._state = STATE_LIP_RESULTS
+
+            elif action == ACTION_UPDATE_TEXT:
+                self.l16['text'] = f'Your overall makeup colors are: {self.vid.recommended_color_list}'
         
         # Default case 
         # Likely something that's wrong
@@ -387,14 +409,16 @@ class App:
         Called every self.delay milliseconds
         '''
         # try:
-        ret, frame = self.vid.get_frame(self._state,self._tone,App)
+        if self._state not in [STATE_MENU, STATE_SKIN_TONE, STATE_RESULTS]:
 
-        # Update label text if anything exists
-        self.update_fsm(ACTION_UPDATE_TEXT)
+            ret, frame = self.vid.get_frame(self._state,self._tone,App)
 
-        if ret:
-            self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
-            self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
+            # Update label text if anything exists
+            self.update_fsm(ACTION_UPDATE_TEXT)
+
+            if ret:
+                self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
+                self.canvas.create_image(0, 0, image = self.photo, anchor = NW)
 
         self.window.after(self.delay, self.update)
 
@@ -405,7 +429,13 @@ class VideoCapture:
         print(dir(self.vid))
         self.face_results = None
         self.recommended_color = None
-
+        self.recommended_color_list = { 
+            FEATURE_CHEEKS: None,
+            FEATURE_EYES: None,
+            FEATURE_UPPER_CHEEKS: None,
+            FEATURE_CHEEK_BONES: None,
+            FEATURE_LIPS: None
+        } 
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
 
@@ -474,6 +504,7 @@ class VideoCapture:
                     fillcolor = COLOR_PALETTE[self.face_results][FEATURE_EYES][tone][0]
                     fill_hexagon(vis,eye_rects,fillcolor, thickness = -1)
                     self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_EYES][tone][1]
+                    self.recommended_color_list[FEATURE_EYES] = self.recommended_color
                     print(self.recommended_color)
                 
                 elif state == STATE_BLUSH:  
@@ -488,6 +519,7 @@ class VideoCapture:
                     draw_rects(vis,cheek_rects,fillcolor,thickness = -1)
                     draw_rects(vis,cheek_rects,(0, 0, 255))
                     self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_CHEEKS][tone][1]
+                    self.recommended_color_list[FEATURE_CHEEKS] = self.recommended_color            
     
                 elif state == STATE_HIGHLIGHTER:
                     upper_cheeks = find_upper_cheeks(rects)
@@ -498,6 +530,7 @@ class VideoCapture:
                     fillcolor = COLOR_PALETTE[self.face_results][FEATURE_UPPER_CHEEKS][tone][0]
                     fill_triangle(vis,upper_cheeks,fillcolor,thickness = -1)
                     self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_UPPER_CHEEKS][tone][1]
+                    self.recommended_color_list[FEATURE_UPPER_CHEEKS] = self.recommended_color
                     # fill in the shape
 
                 elif state == STATE_CONTOUR:
@@ -509,6 +542,7 @@ class VideoCapture:
                     fillcolor = COLOR_PALETTE[self.face_results][FEATURE_CHEEK_BONES][tone][0]
                     fill_triangle(vis,cheek_bones,fillcolor,thickness = -1)
                     self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_CHEEK_BONES][tone][1]
+                    self.recommended_color_list[FEATURE_CHEEK_BONES] = self.recommended_color
                     
                 elif state == STATE_LIP:
                     lip_ellipses = find_lips(rects)
@@ -519,6 +553,7 @@ class VideoCapture:
                     fillcolor = COLOR_PALETTE[self.face_results][FEATURE_LIPS][tone][0]
                     draw_ellipses(vis, lip_ellipses, fillcolor,thickness = -1)
                     self.recommended_color = COLOR_PALETTE[self.face_results][FEATURE_LIPS][tone][1]
+                    self.recommended_color_list[FEATURE_LIPS] = self.recommended_color
                     print(self.recommended_color)
 
                 # add weighted function
