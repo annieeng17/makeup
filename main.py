@@ -40,7 +40,7 @@ class App:
         self.window.bind('<Escape>', lambda e: self.window.quit()) # can't write def in one line, make it as e
         self.video_source = video_source
         # citation: https://pythonbasics.org/python-play-sound/
-        playsound('Zora.mp3', False)
+        # playsound('Zora.mp3', False)
         self._state = STATE_MENU
         self._tone = None
         # self._face_feature = FACE
