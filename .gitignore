@@ -7,6 +7,10 @@ frozen_east_text_detection.tar.gz
 *.jpg
 *.png
 
+# Do not commit mp4, mp3 and zip files
+*.mp4
+*.mp3
+*.zip
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
